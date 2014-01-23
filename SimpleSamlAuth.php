@@ -144,55 +144,53 @@ class SimpleSamlAuth {
 	 * This also happens if the user already exists.
 	 */
 	protected function sync() {
-		{
-			global $wgRequest, $wgOut;
-			$this->as->requireAuth();
+		global $wgRequest, $wgOut;
+		$this->as->requireAuth();
 
-			$attr = $this->as->getAttributes();
+		$attr = $this->as->getAttributes();
 
-			if (!array_key_exists($this->usernameAttr, $attr) || count($attr[$this->usernameAttr]) != 1)
-				return false; // No username attribute in SAML assertion, bailing.
+		if (!array_key_exists($this->usernameAttr, $attr) || count($attr[$this->usernameAttr]) != 1)
+			return false; // No username attribute in SAML assertion, bailing.
 
-			$u = User::newFromName($attr[$this->usernameAttr][0]);
+		$u = User::newFromName($attr[$this->usernameAttr][0]);
 
-			if (array_key_exists($this->realnameAttr, $attr) && count($attr[$this->realnameAttr]) == 1) {
-				$u->setRealName($attr[$this->realnameAttr][0]);
+		if (array_key_exists($this->realnameAttr, $attr) && count($attr[$this->realnameAttr]) == 1) {
+			$u->setRealName($attr[$this->realnameAttr][0]);
+		}
+		if (array_key_exists($this->mailAttr, $attr) && count($attr[$this->mailAttr]) == 1) {
+			$u->setEmail($attr[$this->mailAttr][0]);
+			if ($this->autoMailConfirm && !$u->isEmailConfirmed()) {
+				$u->confirmEmail();
 			}
-			if (array_key_exists($this->mailAttr, $attr) && count($attr[$this->mailAttr]) == 1) {
-				$u->setEmail($attr[$this->mailAttr][0]);
-				if ($this->autoMailConfirm && !$u->isEmailConfirmed()) {
-					$u->confirmEmail();
-				}
-			}
-			$this->setGroups($u, $attr);
+		}
+		$this->setGroups($u, $attr);
 
-			if ($u->getID() == 0) {
-				if ($this->autocreate) {
-					$u->setPassword(uniqid()); // do something random
-					$u->addToDatabase();
-				}
+		if ($u->getID() == 0) {
+			if ($this->autocreate) {
+				$u->setPassword(uniqid()); // do something random
+				$u->addToDatabase();
+			}
+			else
+			{
+				return true;
+			}
+		}
+
+		$u->setCookies();
+		$u->saveSettings();
+
+		// Redirect if a returnto parameter exists
+		$returnto = $wgRequest->getVal("returnto");
+		if ($returnto) {
+			$target = Title::newFromText($returnto);
+			if ($target) {
+				// Make sure we don't try to redirect to logout !
+				if ($target->getNamespace() == NS_SPECIAL)
+					$url = Title::newMainPage()->getFullUrl();
 				else
-				{
-					return true;
-				}
-			}
+					$url = $target->getFullUrl();
 
-			$u->setCookies();
-			$u->saveSettings();
-
-			// Redirect if a returnto parameter exists
-			$returnto = $wgRequest->getVal("returnto");
-			if ($returnto) {
-				$target = Title::newFromText($returnto);
-				if ($target) {
-					// Make sure we don't try to redirect to logout !
-					if ($target->getNamespace() == NS_SPECIAL)
-						$url = Title::newMainPage()->getFullUrl();
-					else
-						$url = $target->getFullUrl();
-
-					$wgOut->redirect($url."?action=purge"); //action=purge is used to purge the cache
-				}
+				$wgOut->redirect($url."?action=purge"); //action=purge is used to purge the cache
 			}
 		}
 	}
