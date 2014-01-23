@@ -64,7 +64,7 @@ class SimpleSamlAuth {
 			$this->groupMap = $config['groupMap'];
 		}
 		if (array_key_exists('sspRoot', $config)) {
-			$this->sspRoot = $config['sspRoot'];
+			$this->sspRoot = rtrim($config['sspRoot'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 		}
 		else
 		{
