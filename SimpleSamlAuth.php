@@ -22,6 +22,7 @@ class SimpleSamlAuth {
 	protected $mailAttr = 'mail';
 	protected $autocreate = false;
 	protected $readHook = false;
+	protected $autoMailConfirm = false;
 	protected $sspRoot;
 	protected $postLogoutRedirect;
 	protected $groupMap = array (
@@ -79,6 +80,9 @@ class SimpleSamlAuth {
 		}
 		if (array_key_exists('readHook', $config)) {
 			$this->readHook = $config['readHook'];
+		}
+		if (array_key_exists('autoMailConfirm', $config)) {
+			$this->autoMailConfirm = $config['autoMailConfirm'];
 		}
 		if (array_key_exists('postLogoutRedirect', $config)) {
 			$this->postLogoutRedirect = $config['postLogoutRedirect'];
@@ -151,13 +155,16 @@ class SimpleSamlAuth {
 
 			$u = User::newFromName($attr[$this->usernameAttr][0]);
 
-			if (array_key_exists($this->realnameAttr, $attr) && count($attr[$this->realnameAttr]) == 1)
+			if (array_key_exists($this->realnameAttr, $attr) && count($attr[$this->realnameAttr]) == 1) {
 				$u->setRealName($attr[$this->realnameAttr][0]);
-			if (array_key_exists($this->mailAttr, $attr) && count($attr[$this->mailAttr]) == 1)
+			}
+			if (array_key_exists($this->mailAttr, $attr) && count($attr[$this->mailAttr]) == 1) {
 				$u->setEmail($attr[$this->mailAttr][0]);
-			$u->setToken();
+				if ($this->autoMailConfirm && !$u->isEmailConfirmed()) {
+					$u->confirmEmail();
+				}
+			}
 			$this->setGroups($u, $attr);
-			$u->saveSettings();
 
 			if ($u->getID() == 0) {
 				if ($this->autocreate) {

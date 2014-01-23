@@ -54,3 +54,6 @@ Redirect users to the login page if they experience a permission error which pre
 ### postLogoutRedirect
 *(default value: current page or main page)*  
 Redirect users to this URL after they logout.
+### autoMailConfirm
+*(default value: __false__)*  
+When logging in, the Mediawiki user will automatically get is e-mail address confirmed. Will only work together with *mailAttr*.
