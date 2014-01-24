@@ -36,6 +36,8 @@ class SimpleSamlAuth {
 
 	/* SAML Assertion Service */
 	protected $as;
+	
+	private $authenticated = false;
 
 	/**
 	 * Convenience function to make the config file prettier.
@@ -92,8 +94,11 @@ class SimpleSamlAuth {
 
 		$this->as = new SimpleSAML_Auth_Simple($this->authSource);
 
-		// Triggers handling of SAML assertion before Mediawiki framework throws it out.
-		$this->as->isAuthenticated();
+		/*
+		 * Triggers handling of SAML assertion before Mediawiki framework throws it out.
+		 * Value is cached for performance reasons
+		 */
+		$this->authenticated = $this->as->isAuthenticated();
 
 		global $wgHooks;
 		$wgHooks['UserLoadFromSession'][] = array($this, 'login');
@@ -109,7 +114,7 @@ class SimpleSamlAuth {
 	public function onTitleReadWhitelist($title, $user, &$whitelisted) {
 		if (!$this->readHook)
 			return false;
-		if (!$this->as->isAuthenticated())
+		if (!$this->authenticated)
 			$this->as->requireAuth();
 		return false;
 	}
@@ -123,11 +128,37 @@ class SimpleSamlAuth {
 
 		if (isset($_REQUEST['title'])) {
 			$lg = Language::factory($wgLanguageCode);
-			if ($user->isLoggedIn() && !$this->as->isAuthenticated() || $_REQUEST['title'] == $lg->specialPage('Userlogout')) {
+
+			$logoutClicked = $_REQUEST['title'] == $lg->specialPage('Userlogout');
+
+			$loginClicked = !$logoutClicked && $_REQUEST['title'] == $lg->specialPage('Userlogin');
+
+			/**
+			 * There is a valid Mediawiki login,
+			 * but there is no SAML assertion.
+			 * @todo check if SAML assertion matches Mediawiki user.
+			 */
+			$invalidLogin = $user->isLoggedIn() && !$this->authenticated;
+
+			/**
+			 * There is a valid SAML assertion,
+			 * but Mediawiki is not logged in.
+			 */
+			$unsyncedLogin = $this->authenticated && !$user->isLoggedIn();
+
+			if ($invalidLogin || $logoutClicked) {
 				$this->logout($user);
 			}
-			else if ($this->as->isAuthenticated() && !$user->isLoggedIn() || $_REQUEST['title'] == $lg->specialPage('Userlogin')) {
-				$this->sync();
+			else if ($unsyncedLogin || $loginClicked) {
+				$syncSuccess = $this->sync();
+			}
+			if ($unsyncedLogin && $loginClicked && !$syncSuccess) {
+				/**
+				 * Syncing failed, meaning that there is a SAML assertion but Mediawiki login failed.
+				 * This can happen if the Mediawiki user does not exist, or the username field doesn't exist.
+				 * The situation is resolved by removing the SAML assertion, which is done by logging out SAML.
+				 */
+				$this->as->logout();
 			}
 		}
 
@@ -139,18 +170,23 @@ class SimpleSamlAuth {
 	 * If the user doesn't exist, and autocreate has been turned on in the config,
 	 * the user is created.
 	 *
+	 * Because this function requires a SAML assertion, it may redirect the user to the IdP and exit.
+	 *
 	 * If realnameAttr and/or mailAttr and/or groupMap are set in the config,
 	 * these attributes are synchronised to the Mediawiki user.
 	 * This also happens if the user already exists.
+	 *
+	 * @return whether a Mediawiki logon was performed
 	 */
 	protected function sync() {
-		global $wgRequest, $wgOut;
 		$this->as->requireAuth();
 
 		$attr = $this->as->getAttributes();
 
-		if (!array_key_exists($this->usernameAttr, $attr) || count($attr[$this->usernameAttr]) != 1)
-			return false; // No username attribute in SAML assertion, bailing.
+		if (!array_key_exists($this->usernameAttr, $attr) || count($attr[$this->usernameAttr]) != 1) {
+			// No username attribute in SAML assertion, bailing.
+			return false;
+		}
 
 		$u = User::newFromName($attr[$this->usernameAttr][0]);
 
@@ -172,14 +208,20 @@ class SimpleSamlAuth {
 			}
 			else
 			{
-				return true;
+				// User doesn't exist and autocration is off
+				return false;
 			}
 		}
 
 		$u->setCookies();
 		$u->saveSettings();
 
-		// Redirect if a returnto parameter exists
+		$this->redirect();
+		return true;
+	}
+	
+	protected function redirect() {
+		global $wgRequest, $wgOut;
 		$returnto = $wgRequest->getVal("returnto");
 		if ($returnto) {
 			$target = Title::newFromText($returnto);
@@ -189,7 +231,6 @@ class SimpleSamlAuth {
 					$url = Title::newMainPage()->getFullUrl();
 				else
 					$url = $target->getFullUrl();
-
 				$wgOut->redirect($url."?action=purge"); //action=purge is used to purge the cache
 			}
 		}
