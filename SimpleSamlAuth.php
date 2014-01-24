@@ -43,7 +43,16 @@ class SimpleSamlAuth {
 	 * Convenience function to make the config file prettier.
 	 */
 	public static function registerHook($config) {
-		new SimpleSamlAuth($config);
+		global $wgHooks;
+		$auth = new SimpleSamlAuth($config);
+		$wgHooks['UserLoadFromSession'][] =
+			array($auth, 'login');
+		$wgHooks['GetPreferences'][] =
+			array($auth, 'limitPreferences');
+		$wgHooks['SpecialPage_initList'][] =
+			array($auth, 'limitSpecialPages');
+		$wgHooks['TitleReadWhitelist'][] =
+			array($auth, 'onTitleReadWhitelist');
 	}
 
 	/**
@@ -99,14 +108,6 @@ class SimpleSamlAuth {
 		 * Value is cached for performance reasons
 		 */
 		$this->authenticated = $this->as->isAuthenticated();
-
-		global $wgHooks;
-		$wgHooks['UserLoadFromSession'][] = array($this, 'login');
-		$wgHooks['GetPreferences'][] = array($this, 'limitPreferences');
-		$wgHooks['SpecialPage_initList'][] = array($this, 'limitSpecialPages');
-		if ($this->readHook) {
-			$wgHooks['TitleReadWhitelist'][] = array($this, 'onTitleReadWhitelist');
-		}
 	}
 
 	/**
