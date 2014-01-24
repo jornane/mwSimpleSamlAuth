@@ -102,9 +102,39 @@ class SimpleSamlAuth {
 
 		global $wgHooks;
 		$wgHooks['UserLoadFromSession'][] = array($this, 'login');
+		$wgHooks['GetPreferences'][] = array($this, 'limitPreferences');
+		$wgHooks['SpecialPage_initList'][] = array($this, 'limitSpecialPages');
 		if ($this->readHook) {
 			$wgHooks['TitleReadWhitelist'][] = array($this, 'onTitleReadWhitelist');
 		}
+	}
+
+	/**
+	 * Disables preferences which are redundant while using an external authentication source.
+	 * Password change is always disabled, e-mail settings are enabled/disabled based on the configuration.
+	 */
+	function limitPreferences($user, &$preferences) {
+		unset($preferences['password']);
+		unset($preferences['rememberpassword']);
+		if ($this->autoMailConfirm) {
+			unset($preferences['emailaddress']);
+		}
+		return true;
+	}
+	/**
+	 * Disables special pages which are redundant while using an external authentication source.
+	 * Password change is always disabled, e-mail confirmation is disabled when autoconfirm is disabled.
+	 *
+	 * Note: When autoMailConfirm is true, but mailAttr is invalid,
+	 * users will have no way to confirm their e-mail address.
+	 */
+	public function limitSpecialPages(&$list) {
+		unset($list['ChangePassword']);
+		unset($list['PasswordReset']);
+		if ($this->autoMailConfirm) {
+			unset($list['ConfirmEmail']);
+		}
+		return true;
 	}
 
 	/**
