@@ -37,6 +37,7 @@ class SimpleSamlAuth {
 	/* SAML Assertion Service */
 	protected $as;
 	
+	/* Cached value of $as->isAuthenticated() */
 	private $authenticated = false;
 
 	/**
@@ -99,13 +100,14 @@ class SimpleSamlAuth {
 			$this->postLogoutRedirect = $config['postLogoutRedirect'];
 		}
 
+		// Load the simpleSamlPhp framework
 		require_once $this->sspRoot . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
 		$this->as = new SimpleSAML_Auth_Simple($this->authSource);
 
 		/*
-		 * Triggers handling of SAML assertion before Mediawiki framework throws it out.
-		 * Value is cached for performance reasons
+		 * Triggers handling of SAML assertion before the Mediawiki framework redirects us.
+		 * Calling this method now will allow us to call $this->as->getAttributes() later.
 		 */
 		$this->authenticated = $this->as->isAuthenticated();
 	}
@@ -129,11 +131,11 @@ class SimpleSamlAuth {
 	 * Note: When autoMailConfirm is true, but mailAttr is invalid,
 	 * users will have no way to confirm their e-mail address.
 	 */
-	public function limitSpecialPages(&$list) {
-		unset($list['ChangePassword']);
-		unset($list['PasswordReset']);
+	public function limitSpecialPages(&$pages) {
+		unset($pages['ChangePassword']);
+		unset($pages['PasswordReset']);
 		if ($this->autoMailConfirm) {
-			unset($list['ConfirmEmail']);
+			unset($pages['ConfirmEmail']);
 		}
 		return true;
 	}
@@ -251,18 +253,23 @@ class SimpleSamlAuth {
 		return true;
 	}
 	
+	/**
+	 * Redirect back to the requested page after logging in.
+	 * If the requested page was a special page, redirect to the main page.
+	 */
 	protected function redirect() {
 		global $wgRequest, $wgOut;
-		$returnto = $wgRequest->getVal("returnto");
+		$returnto = $wgRequest->getVal('returnto');
 		if ($returnto) {
 			$target = Title::newFromText($returnto);
 			if ($target) {
 				// Make sure we don't try to redirect to logout !
-				if ($target->getNamespace() == NS_SPECIAL)
+				if ($target->getNamespace() == NS_SPECIAL) {
 					$url = Title::newMainPage()->getFullUrl();
-				else
+				} else {
 					$url = $target->getFullUrl();
-				$wgOut->redirect($url."?action=purge"); //action=purge is used to purge the cache
+				}
+				$wgOut->redirect($url.'?action=purge'); //action=purge is used to purge the cache
 			}
 		}
 	}
@@ -285,14 +292,13 @@ class SimpleSamlAuth {
 	public function setGroups($u, $attr) {
 		foreach($this->groupMap as $group => $rules) {
 			foreach($rules as $attrName => $needles) {
-				if (!array_key_exists($attrName, $attr))
-					 continue;
+				if (!array_key_exists($attrName, $attr)) {
+					continue;
+				}
 				foreach($needles as $needle) {
 					if (in_array($needle, $attr[$attrName])) {
 						$u->addGroup($group);
-					}
-					else
-					{
+					} else {
 						$u->removeGroup($group);
 					}
 				}
