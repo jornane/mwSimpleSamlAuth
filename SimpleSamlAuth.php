@@ -236,7 +236,6 @@ class SimpleSamlAuth {
 
 		if ($u->getID() == 0) {
 			if ($this->autocreate) {
-				$u->setPassword(uniqid()); // do something random
 				$u->addToDatabase();
 			}
 			else
