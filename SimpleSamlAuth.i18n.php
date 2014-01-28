@@ -25,3 +25,31 @@ $messages['en'] = array(
 $messages['de'] = array(
         'simplesamlauth-desc' => 'Ermöglicht SAML-Authentifizierung mit [https://simplesamlphp.org/ SimpleSAMLphp]'
 );
+
+/** Norwegian (bokmål)
+ * @author Yørn de Jong
+ */
+$messages['nb'] = array(
+        'simplesamlauth-desc' => 'Gjør SAML-autentisering mulig ved hjelp av [https://simplesamlphp.org/ SimpleSAMLphp]'
+);
+
+/** Norwegian (nynorsk)
+ * @author Yørn de Jong
+ */
+$messages['nn'] = array(
+        'simplesamlauth-desc' => 'Gjer SAML-autentisering mogeleg ved hjelp av [https://simplesamlphp.org/ SimpleSAMLphp]'
+);
+
+/** Dutch (Nederlands)
+ * @author Yørn de Jong
+ */
+$messages['nl'] = array(
+        'simplesamlauth-desc' => 'Maakt SAML-authenticatie mogelijk via [https://simplesamlphp.org/ SimpleSAMLphp]'
+);
+
+/** Frisian (Frysk)
+ * @author Yørn de Jong
+ */
+$messages['fy'] = array(
+        'simplesamlauth-desc' => 'Makket SAML-authenticatie mooglik fia [https://simplesamlphp.org/ SimpleSAMLphp]'
+);
