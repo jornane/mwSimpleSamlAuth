@@ -11,16 +11,16 @@
 $messages = array();
 
 /** English
-* @author Yørn de Jong
-* @author Kghbln
-*/
+ * @author Yørn de Jong
+ * @author Kghbln
+ */
 $messages['en'] = array(
         'simplesamlauth-desc' => 'Enables SAML authentication using [https://simplesamlphp.org/ SimpleSAMLphp]'
 );
 
 /** German (Deutsch)
-* @author Kghbln
-*/
+ * @author Kghbln
+ */
 $messages['de'] = array(
         'simplesamlauth-desc' => 'Ermöglicht SAML-Authentifizierung mit [https://simplesamlphp.org/ SimpleSAMLphp]'
 );
