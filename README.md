@@ -2,8 +2,8 @@
 Requires [simpleSamlPhp](http://simplesamlphp.org) and PHP >= 5.3. Tested on Mediawiki 1.21.
 
 ## Installation
-* Create a directory **SimpleSamlAuth** in the *extensions* directory and copy **SimpleSamlAuth.php** there.
 * Install simpleSamlPhp. For easy deployment, this plugin will look for a directory *simplesamlphp* in the same directory where SimpleSamlAuth.php is installed, but it is recommended that you put it somewhere else instead and configure this location in the config. *See the simpleSamlPhp documentation for instructions on how to install simpleSamlPhp.*
+* Clone this repository into your Mediawikis *extensions* directory, and call it **SimpleSamlAuth.php**.  ```git clone git@github.com:yorn/mwSimpleSamlAuth.git SimpleSamlAuth```
 * Configure simpleSamlPhp so that it can authenticate against your authentication source. *Again see the simpleSamlPhp documentation on how to do this.*
 * Add the following lines to your **LocalSettings.php** in your Mediawiki installation:
 
