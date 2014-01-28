@@ -1,18 +1,34 @@
 <?php
 /**
- * SimpleSamlAuth.php
- * Written by Yørn de Jong
- * @license: LGPL (GNU Lesser General Public License) http://www.gnu.org/licenses/lgpl.html
+ * Main file for the SimpleSamlAuth extension.
+ * 
+ * @file
+ * @ingroup Extensions
+ * @defgroup SimpleSamlAuth
  *
+ * @link https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth Documentation
+ * @link https://www.mediawiki.org/wiki/Extension_talk:SimpleSamlAuth Support
+ * @link https://github.com/yorn/mwSimpleSamlAuth Source Code
+ *
+ * @license http://www.gnu.org/licenses/lgpl.html LGPL (GNU Lesser General Public License)
+ * @copyright (C) 2014, Yørn de Jong
  * @author Yørn de Jong
- *
- *
  */
 
 if ( !defined( 'MEDIAWIKI' ) ) {
 	die( 'This is a MediaWiki extension, and must be run from within MediaWiki.' );
 }
 
+$wgExtensionCredits['other'][] = array(
+    'path' => __FILE__,
+    'name' => 'SimpleSamlAuth',
+    'version' => '0.2',
+    'author' => 'Yørn de Jong',
+    'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
+    'descriptionmsg' => 'simplesamlauth-desc'
+);
+
+$wgExtensionMessagesFiles['SimpleSamlAuth'] = __DIR__ . '/SimpleSamlAuth.i18n.php';
 
 class SimpleSamlAuth {
 
