@@ -97,7 +97,7 @@ class SimpleSamlAuth {
 		}
 		else
 		{
-			$this->sspRoot = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR)
+			$this->sspRoot = rtrim(__DIR__, DIRECTORY_SEPARATOR)
 				. DIRECTORY_SEPARATOR
 				. 'simplesamlphp'
 				. DIRECTORY_SEPARATOR
