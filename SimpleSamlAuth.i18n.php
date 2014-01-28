@@ -1,3 +1,4 @@
+<?php
 /**
  * Internationalisation file for the SimpleSamlAuth extension
  *
