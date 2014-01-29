@@ -51,5 +51,5 @@ $messages['nl'] = array(
  * @author Yørn de Jong
  */
 $messages['fy'] = array(
-        'simplesamlauth-desc' => 'Makket SAML-authenticatie mooglik fia [https://simplesamlphp.org/ SimpleSAMLphp]'
+        'simplesamlauth-desc' => 'Makket SAML-autentikaasje mooglik fia [https://simplesamlphp.org/ SimpleSAMLphp]'
 );
