@@ -1,5 +1,5 @@
 # SAML plugin for Mediawiki
-Requires [simpleSamlPhp](http://simplesamlphp.org) and PHP >= 5.3. Tested on Mediawiki 1.21.
+Requires [simpleSamlPhp](http://simplesamlphp.org) and PHP >= 5.3. Tested on Mediawiki 1.15 and higher.
 
 ## Installation
 * Clone this repository into your Mediawikis *extensions* directory, and call it **SimpleSamlAuth.php**.  ```git clone git@github.com:yorn/mwSimpleSamlAuth.git SimpleSamlAuth```
@@ -9,9 +9,19 @@ Requires [simpleSamlPhp](http://simplesamlphp.org) and PHP >= 5.3. Tested on Med
 
 ```php
 require_once "$IP/extensions/SimpleSamlAuth/SimpleSamlAuth.php";
-SimpleSamlAuth::registerHooks(array(
-	// config goes here
-));
+SimpleSamlAuth::registerHook( array(
+	// change these values to match your setup
+	'sspRoot' => '../simplesamlphp',
+	'authSource' => 'default-sp',
+	'usernameAttr' => 'uid',
+	'realnameAttr' => 'cn',
+	'mailAttr' => 'mail',
+	'autocreate' => false,
+	'readHook' => false, // if true, don't show "Login required" page, redirect right away
+	'autoMailConfirm' => false,
+	// 'postLogoutRedirect' => 'https://www.mediawiki.org/' // some URL, if commented out redirect to page you came from
+	)
+);
 ```
 
 ## Configuration
@@ -49,11 +59,11 @@ The location of the simpleSamlPhp installation.
 *(default value: __false__)*  
 Whether users are created if they don't exist in Mediawiki yet.
 ### readHook
-*(default value: __false__)*  
+*(default value: __false__, requires Mediawiki 1.19 or newer)*  
 Redirect users to the login page if they experience a permission error which prevents reading the page. This is only useful on wikis that are configured against anonymous read access.
 ### postLogoutRedirect
 *(default value: current page or main page)*  
 Redirect users to this URL after they logout.
 ### autoMailConfirm
 *(default value: __false__)*  
-When logging in, the Mediawiki user will automatically get is e-mail address confirmed. Will only work together with *mailAttr*.
+When logging in, the Mediawiki user will automatically get is e-mail address confirmed. Will only work together with *mailAttr*. Will not hide the activate button on Mediawiki <= 1.16.
