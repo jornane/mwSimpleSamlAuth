@@ -66,4 +66,4 @@ Redirect users to the login page if they experience a permission error which pre
 Redirect users to this URL after they logout.
 ### autoMailConfirm
 *(default value: __false__)*  
-When logging in, the Mediawiki user will automatically get is e-mail address confirmed. Will only work together with *mailAttr*. Will not hide the activate button on Mediawiki <= 1.16.
+When logging in, the Mediawiki user will automatically get is e-mail address confirmed. Will only work together with *mailAttr*. Will not hide the activate button on Mediawiki <= 1.16, see also [$wgEmailAuthentication](https://www.mediawiki.org/wiki/Manual:$wgEmailAuthentication).
