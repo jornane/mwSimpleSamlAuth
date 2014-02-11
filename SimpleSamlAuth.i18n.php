@@ -53,3 +53,11 @@ $messages['nl'] = array(
 $messages['fy'] = array(
         'simplesamlauth-desc' => 'Makket SAML-autentikaasje mooglik fia [https://simplesamlphp.org/ SimpleSAMLphp]'
 );
+
+/** Estonian                                                                    
+ * @author Kristian Kankainen                                                   
+ */
+$messages['et'] = array(
+        'simplesamlauth-desc' => 'Võimaldab SAML-iga autentimise kasutades [https://simplesamlphp.org/ SimpleSAMLphp]'
+);
+
