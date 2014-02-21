@@ -158,7 +158,7 @@ class SimpleSamlAuth {
 	 * users will have no way to confirm their e-mail address.
 	 */
 	public function hookInitSpecialPages(&$pages) {
-		if ($this->as->isAuthenticated()) {
+		if ($this->samlOnly || $this->as->isAuthenticated()) {
 			unset($pages['ChangePassword']);
 			unset($pages['PasswordReset']);
 			if ($this->autoMailConfirm) {
