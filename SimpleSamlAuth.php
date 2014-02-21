@@ -37,7 +37,8 @@ class SimpleSamlAuth {
 	protected $realnameAttr = 'cn';
 	protected $mailAttr = 'mail';
 	protected $autoCreate = false;
-	protected $readHook = false;
+	protected $samlRequired = false;
+	protected $samlOnly = false;
 	protected $autoMailConfirm = false;
 	protected $sspRoot;
 	protected $postLogoutRedirect;
@@ -53,9 +54,6 @@ class SimpleSamlAuth {
 	/* SAML Assertion Service */
 	protected $as;
 
-	/* Cached value of $as->isAuthenticated() */
-	private $authenticated = false;
-
 	/**
 	 * Convenience function to make the config file prettier.
 	 */
@@ -63,13 +61,13 @@ class SimpleSamlAuth {
 		global $wgHooks;
 		$auth = new SimpleSamlAuth($config);
 		$wgHooks['UserLoadFromSession'][] =
-			array($auth, 'login');
+			array($auth, 'hookLoadSession');
 		$wgHooks['GetPreferences'][] =
-			array($auth, 'limitPreferences');
+			array($auth, 'hookLimitPreferences');
 		$wgHooks['SpecialPage_initList'][] =
-			array($auth, 'limitSpecialPages');
-		$wgHooks['TitleReadWhitelist'][] =
-			array($auth, 'onTitleReadWhitelist');
+			array($auth, 'hookInitSpecialPages');
+		$wgHooks['UserLoginForm'][] =
+			array($auth, 'hookLoginForm');
 	}
 
 	/**
@@ -108,12 +106,21 @@ class SimpleSamlAuth {
 		} elseif (array_key_exists('autocreate', $config)) {
 			$this->autoCreate = $config['autocreate']; // Legacy
 			trigger_error(
-				'SimpleSamlAuth config key "autocreate" should be "autoCreate"',
+				'SimpleSamlAuth config flag "autocreate" should be "autoCreate"',
 				E_USER_NOTICE
 			);
 		}
-		if (array_key_exists('readHook', $config)) {
-			$this->readHook = $config['readHook'];
+		if (array_key_exists('samlRequired', $config)) {
+			$this->samlRequired = $config['samlRequired'];
+		} elseif (array_key_exists('readHook', $config)) {
+			$this->samlRequired = $config['readHook']; // Legacy
+			trigger_error(
+				'SimpleSamlAuth config flag "readHook" should be "samlRequired"',
+				E_USER_NOTICE
+			);
+		}
+		if ($this->samlRequired || array_key_exists('samlOnly', $config)) {
+			$this->samlOnly = $this->samlRequired || $config['samlOnly'];
 		}
 		if (array_key_exists('autoMailConfirm', $config)) {
 			$this->autoMailConfirm = $config['autoMailConfirm'];
@@ -126,25 +133,22 @@ class SimpleSamlAuth {
 		require_once $this->sspRoot . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
 		$this->as = new SimpleSAML_Auth_Simple($this->authSource);
-
-		/*
-		 * Triggers handling of SAML assertion before the Mediawiki framework redirects us.
-		 * Calling this method now will allow us to call $this->as->getAttributes() later.
-		 */
-		$this->authenticated = $this->as->isAuthenticated();
 	}
 
 	/**
 	 * Disables preferences which are redundant while using an external authentication source.
 	 * Password change is always disabled, e-mail settings are enabled/disabled based on the configuration.
 	 */
-	function limitPreferences($user, &$preferences) {
-		unset($preferences['password']);
-		unset($preferences['rememberpassword']);
-		if ($this->autoMailConfirm) {
-			unset($preferences['emailaddress']);
+	function hookLimitPreferences($user, &$preferences) {
+		if ($this->as->isAuthenticated()) {
+			unset($preferences['password']);
+			unset($preferences['rememberpassword']);
+			if ($this->autoMailConfirm) {
+				unset($preferences['emailaddress']);
+			}
+			return true;
 		}
-		return true;
+		return false;
 	}
 	/**
 	 * Disables special pages which are redundant while using an external authentication source.
@@ -153,206 +157,179 @@ class SimpleSamlAuth {
 	 * Note: When autoMailConfirm is true, but mailAttr is invalid,
 	 * users will have no way to confirm their e-mail address.
 	 */
-	public function limitSpecialPages(&$pages) {
-		unset($pages['ChangePassword']);
-		unset($pages['PasswordReset']);
-		if ($this->autoMailConfirm) {
-			unset($pages['ConfirmEmail']);
+	public function hookInitSpecialPages(&$pages) {
+		if ($this->as->isAuthenticated()) {
+			unset($pages['ChangePassword']);
+			unset($pages['PasswordReset']);
+			if ($this->autoMailConfirm) {
+				unset($pages['ConfirmEmail']);
+			}
+			return true;
 		}
-		return true;
-	}
-
-	/**
-	 * Hooked function, will require a SAML assertion if one doesn't already exist.
-	 * Used to skip the "Login required" screen and continue to the login page rightaway.
-	 */
-	public function onTitleReadWhitelist($title, $user, &$whitelisted) {
-		if (!$this->readHook)
-			return false;
-		if (!$this->authenticated)
-			$this->as->requireAuth();
 		return false;
 	}
 
 	/**
-	 * Hooked function, will log the user in if a SAML assertion exists,
-	 * and will require an assertion if the Userlogin page is opened.
+	 * @param $template UserloginTemplate
+	 * @return bool
 	 */
-	public function login($user, &$result) {
-		global $wgLanguageCode;
-
-		if (isset($_REQUEST['title'])) {
-			$lg = Language::factory($wgLanguageCode);
-
-			$logoutClicked = $_REQUEST['title'] == $lg->specialPage('Userlogout');
-
-			$loginClicked = !$logoutClicked && $_REQUEST['title'] == $lg->specialPage('Userlogin');
-
-			/**
-			 * There is a valid Mediawiki login,
-			 * but there is no SAML assertion.
-			 * @todo check if SAML assertion matches Mediawiki user.
-			 */
-			$invalidLogin = $user->isLoggedIn() && !$this->authenticated;
-
-			/**
-			 * There is a valid SAML assertion,
-			 * but Mediawiki is not logged in.
-			 */
-			$unsyncedLogin = $this->authenticated && !$user->isLoggedIn();
-
-			if ($invalidLogin || $logoutClicked) {
-				$this->logout($user);
-			}
-			else if ($unsyncedLogin || $loginClicked) {
-				$syncSuccess = $this->sync();
-			}
-			if ($unsyncedLogin && $loginClicked && !$syncSuccess) {
-				/**
-				 * Syncing failed, meaning that there is a SAML assertion but Mediawiki login failed.
-				 * This can happen if the Mediawiki user does not exist, or the username field doesn't exist.
-				 * The situation is resolved by removing the SAML assertion, which is done by logging out SAML.
-				 */
-				$this->as->logout();
-			}
-		}
-
+	function hookLoginForm(&$template) {
+		$template->set(
+			'extrafields',
+			'<a class="mw-ui-button mw-ui-constructive" href="'.htmlspecialchars($this->as->getLoginURL($this->getReturnUrl())).'">'.
+			wfMessage('simplesamlauth-login')->escaped().'</a>'
+		);
 		return true;
 	}
 
 	/**
-	 * Require a SAML assertion and log the corresponding user in.
+	 * Hooked function, if a SAML assertion exist,
+	 * log in the corresponding MediaWiki user or logout from SAML.
+	 *
+	 * @param $user User MediaWiki User object
+	 * @param $result 
+	 */
+	public function hookLoadSession($user, &$result) {
+		if ($this->samlRequired) {
+			$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
+		}
+		if (isset($_REQUEST['title'])) {
+			global $wgLanguageCode;
+			$lg = Language::factory($wgLanguageCode);
+
+			if ($this->as->isAuthenticated()) {
+				if ($_REQUEST['title'] === $lg->specialPage('Userlogout')) {
+					if (isset($this->postLogoutRedirect)) {
+						$this->as->logout($this->postLogoutRedirect);
+					} else {
+						$this->as->logout(Title::newMainPage()->getFullUrl());
+					}
+				}
+			} elseif ($this->samlOnly && $_REQUEST['title'] === $lg->specialPage('Userlogin')) {
+				$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
+				$result = false;
+				return false;
+			}
+		}
+
+		$this->loadUser($user);
+
+		if ($user instanceof User && $user->isLoggedIn()) { // confusing name: actually checks that user exists in DB
+			global $wgBlockDisablesLogin;
+			if (!$wgBlockDisablesLogin || !$user->isBlocked()) {
+				$attr = $this->as->getAttributes();
+				if (isset($attr[$this->usernameAttr]) && $attr[$this->usernameAttr] && strtolower($user->getName()) === strtolower(reset($attr[$this->usernameAttr]))) {
+					wfDebug("User: logged in from SAML\n");
+					$result = true;
+					return true;
+				}
+			}
+		}
+		if ($this->as->isAuthenticated()) {
+			$this->as->logout();
+		}
+		return null;
+	}
+
+	protected static function checkAttribute($friendlyName, $attributeName, $attr) {
+		if (isset($attr[$attributeName]) && $attr[$attributeName]) {
+			if (count($attr[$attributeName]) != 1) {
+				trigger_error(
+					htmlspecialchars($friendlyName).
+					' attribute "'.
+					htmlspecialchars($attributeName).
+					'" is multi-value, using only the first; '.
+					htmlspecialchars(reset($attr[$attributeName]))
+					, E_USER_WARNING);
+			}
+		}
+	}
+
+	/**
+	 * Return a user object that corresponds to the current SAML assertion.
+	 * If no SAML assertion is set, the function returns NULL.
 	 * If the user doesn't exist, and auto create has been turned on in the config,
 	 * the user is created.
-	 *
-	 * Because this function requires a SAML assertion, it may redirect the user to the IdP and exit.
 	 *
 	 * If realnameAttr and/or mailAttr and/or groupMap are set in the config,
 	 * these attributes are synchronised to the Mediawiki user.
 	 * This also happens if the user already exists.
 	 *
-	 * @return whether a Mediawiki logon was performed
+	 * @param $user MediaWiki user that must correspond to the SAML assertion
+	 *
+	 * @return void
 	 */
-	protected function sync() {
-		$this->as->requireAuth();
-
+	protected function loadUser($user) {
+		if (!$this->as->isAuthenticated()) {
+			return;
+		}
 		$attr = $this->as->getAttributes();
 
-		if (isset($attr[$this->usernameAttr]) && $attr[$this->usernameAttr]) {
-			if (count($attr[$this->usernameAttr]) != 1) {
-				trigger_error(
-					'Username attribute "'.
-					htmlspecialchars($this->usernameAttr).
-					'" is multi-value, using only the first; '.
-					htmlspecialchars($attr[$this->usernameAttr][0])
-					, E_USER_WARNING);
-			}
-			$u = User::newFromName($attr[$this->usernameAttr][0]);
-		} else {
-			trigger_error(
+		if (!isset($attr[$this->usernameAttr]) || !$attr[$this->usernameAttr]) {
+			wfDebug(
 				'Username attribute "'.
 				htmlspecialchars($this->usernameAttr).
 				'" has no value; refusing login'
-				, E_USER_WARNING);
-			// Logout; if the problem is a transient error,
-			// logging in again may fix the problem
-			$this->as->logout();
-			return false;
+			);
+			return;
 		}
 
-		if (isset($attr[$this->realnameAttr]) && $attr[$this->realnameAttr]) {
-			if (count($attr[$this->realnameAttr]) != 1) {
-				trigger_error(
-					'Real name attribute "'.
-					htmlspecialchars($this->realnameAttr).
-					'" is multi-value, using only the first; '.
-					htmlspecialchars($attr[$this->realnameAttr][0])
-					, E_USER_WARNING);
-			}
-			$u->setRealName($attr[$this->realnameAttr][0]);
-		}
-		if (isset($attr[$this->mailAttr]) && $attr[$this->mailAttr]) {
-			if (count($attr[$this->mailAttr]) != 1) {
-				trigger_error(
-					'Mail attribute "'.
-					htmlspecialchars($this->mailAttr).
-					'" is multi-value, using only the first; '.
-					htmlspecialchars($attr[$this->mailAttr][0])
-					, E_USER_NOTICE);
-			}
-			$u->setEmail($attr[$this->mailAttr][0]);
-			if ($this->autoMailConfirm && !$u->isEmailConfirmed()) {
-				$u->confirmEmail();
-			}
-		}
-		$this->setGroups($u, $attr);
+		$this->checkAttribute('Username', $this->usernameAttr, $attr);
+		$this->checkAttribute('Real name', $this->realnameAttr, $attr);
+		$this->checkAttribute('E-mail', $this->mailAttr, $attr);
 
-		if ($u->getID() == 0) {
+		$tempUser = User::newFromName(reset($attr[$this->usernameAttr]));
+		$tempUser->load();
+		$user->setRealName(reset($attr[$this->realnameAttr]));
+		$user->setEmail(reset($attr[$this->mailAttr]));
+		$this->setGroups($user, $attr);
+		$id = $tempUser->getId();
+		if ($id) {
+			$user->setId($id);
+			$user->loadFromId();
+		} else {
 			if ($this->autoCreate) {
-				$u->addToDatabase();
-			}
-			else
-			{
-				trigger_error('User '.htmlspecialchars($attr[$this->usernameAttr][0]).
-					' doesn\'t exist and auto creation is off', E_USER_NOTICE);
-				return false;
+				$user->setName(reset($attr[$this->usernameAttr]));
+				$user->addToDatabase();
+			} else {
+				wfDebug('User '.htmlspecialchars(reset($attr[$this->usernameAttr])).
+					' doesn\'t exist and "autoCreate" flag is FALSE.'
+				);
 			}
 		}
-
-		$u->setCookies();
-		$u->saveSettings();
-
-		$this->redirect();
-		return true;
 	}
 
 	/**
-	 * Redirect back to the requested page after logging in.
-	 * If the requested page was a special page, redirect to the main page.
+	 * Create URL where the user should be directed after login
+	 *
+	 * @return string url
 	 */
-	protected function redirect() {
-		global $wgRequest, $wgOut;
+	protected static function getReturnUrl() {
+		global $wgRequest;
 		$returnto = $wgRequest->getVal('returnto');
 		if ($returnto) {
 			$target = Title::newFromText($returnto);
-			if ($target) {
-				// Make sure we don't try to redirect to logout !
-				if ($target->getNamespace() == NS_SPECIAL) {
-					$url = Title::newMainPage()->getFullUrl();
-				} else {
-					$url = $target->getFullUrl();
-				}
-				$wgOut->redirect($url.'?action=purge'); //action=purge is used to purge the cache
-			}
 		}
-	}
-
-	/**
-	 * End the current Mediawiki and send a logout signal to the SAML IdP.
-	 */
-	protected function logout($user) {
-		$user->logout();
-		if (isset($this->postLogoutRedirect)) {
-			$this->as->logout($this->postLogoutRedirect);
-		} else {
-			$this->as->logout(Title::newMainPage()->getFullUrl());
+		if (!$target || $target->getNamespace() == NS_SPECIAL) {
+			$target = Title::newMainPage();
 		}
+		return $target->getFullUrl();
 	}
 
 	/**
 	 * Add groups based on the existence of attributes in the SAML assertion.
 	 */
-	public function setGroups($u, $attr) {
+	public function setGroups($user, $attr) {
 		foreach($this->groupMap as $group => $rules) {
 			foreach($rules as $attrName => $needles) {
-				if (!array_key_exists($attrName, $attr)) {
+				if (!isset($attr['attrName'])) {
 					continue;
 				}
 				foreach($needles as $needle) {
 					if (in_array($needle, $attr[$attrName])) {
-						$u->addGroup($group);
+						$user->addGroup($group);
 					} else {
-						$u->removeGroup($group);
+						$user->removeGroup($group);
 					}
 				}
 			}

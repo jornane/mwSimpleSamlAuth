@@ -17,6 +17,7 @@ $messages = array();
  */
 $messages['en'] = array(
 	'simplesamlauth-desc' => 'Enables SAML authentication using [https://simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Log in using SAML.',
 );
 
 /** German (Deutsch)
@@ -31,6 +32,7 @@ $messages['de'] = array(
  */
 $messages['nb'] = array(
 	'simplesamlauth-desc' => 'Gjør SAML-autentisering mulig ved hjelp av [https://simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Logg inn ved hjelp av SAML.',
 );
 
 /** Norwegian (nynorsk)
@@ -38,6 +40,7 @@ $messages['nb'] = array(
  */
 $messages['nn'] = array(
 	'simplesamlauth-desc' => 'Gjer SAML-autentisering mogeleg ved hjelp av [https://simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Logg inn ved hjelp av SAML.',
 );
 
 /** Dutch (Nederlands)
@@ -45,6 +48,7 @@ $messages['nn'] = array(
  */
 $messages['nl'] = array(
 	'simplesamlauth-desc' => 'Maakt SAML-authenticatie mogelijk via [https://simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Aanmelden via SAML.',
 );
 
 /** Frisian (Frysk)
@@ -52,6 +56,7 @@ $messages['nl'] = array(
  */
 $messages['fy'] = array(
 	'simplesamlauth-desc' => 'Makket SAML-autentikaasje mooglik fia [https://simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Oanmelde mei SAML.',
 );
 
 /** Estonian                                                                    
