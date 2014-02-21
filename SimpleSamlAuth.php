@@ -232,17 +232,48 @@ class SimpleSamlAuth {
 
 		$attr = $this->as->getAttributes();
 
-		if (!array_key_exists($this->usernameAttr, $attr) || count($attr[$this->usernameAttr]) != 1) {
-			// No username attribute in SAML assertion, bailing.
+		if (isset($attr[$this->usernameAttr]) && $attr[$this->usernameAttr]) {
+			if (count($attr[$this->usernameAttr]) != 1) {
+				trigger_error(
+					'Username attribute "'.
+					htmlspecialchars($this->usernameAttr).
+					'" is multi-value, using only the first; '.
+					htmlspecialchars($attr[$this->usernameAttr][0])
+					, E_USER_WARNING);
+			}
+			$u = User::newFromName($attr[$this->usernameAttr][0]);
+		} else {
+			trigger_error(
+				'Username attribute "'.
+				htmlspecialchars($this->usernameAttr).
+				'" has no value; refusing login'
+				, E_USER_WARNING);
+			// Logout; if the problem is a transient error,
+			// logging in again may fix the problem
+			$this->as->logout();
 			return false;
 		}
 
-		$u = User::newFromName($attr[$this->usernameAttr][0]);
-
-		if (array_key_exists($this->realnameAttr, $attr) && count($attr[$this->realnameAttr]) == 1) {
+		if (isset($attr[$this->realnameAttr]) && $attr[$this->realnameAttr]) {
+			if (count($attr[$this->realnameAttr]) != 1) {
+				trigger_error(
+					'Real name attribute "'.
+					htmlspecialchars($this->realnameAttr).
+					'" is multi-value, using only the first; '.
+					htmlspecialchars($attr[$this->realnameAttr][0])
+					, E_USER_WARNING);
+			}
 			$u->setRealName($attr[$this->realnameAttr][0]);
 		}
-		if (array_key_exists($this->mailAttr, $attr) && count($attr[$this->mailAttr]) == 1) {
+		if (isset($attr[$this->mailAttr]) && $attr[$this->mailAttr]) {
+			if (count($attr[$this->mailAttr]) != 1) {
+				trigger_error(
+					'Mail attribute "'.
+					htmlspecialchars($this->mailAttr).
+					'" is multi-value, using only the first; '.
+					htmlspecialchars($attr[$this->mailAttr][0])
+					, E_USER_NOTICE);
+			}
 			$u->setEmail($attr[$this->mailAttr][0]);
 			if ($this->autoMailConfirm && !$u->isEmailConfirmed()) {
 				$u->confirmEmail();
