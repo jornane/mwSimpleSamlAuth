@@ -22,7 +22,7 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 $wgExtensionCredits['other'][] = array(
     'path' => __FILE__,
     'name' => 'SimpleSamlAuth',
-    'version' => '0.2',
+    'version' => 'GIT-master',
     'author' => 'Yørn de Jong',
     'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
     'descriptionmsg' => 'simplesamlauth-desc'
