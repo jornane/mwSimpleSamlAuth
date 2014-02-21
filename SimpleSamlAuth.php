@@ -1,7 +1,7 @@
 <?php
 /**
  * Main file for the SimpleSamlAuth extension.
- * 
+ *
  * @file
  * @ingroup Extensions
  * @defgroup SimpleSamlAuth
@@ -52,7 +52,7 @@ class SimpleSamlAuth {
 
 	/* SAML Assertion Service */
 	protected $as;
-	
+
 	/* Cached value of $as->isAuthenticated() */
 	private $authenticated = false;
 
@@ -267,7 +267,7 @@ class SimpleSamlAuth {
 		$this->redirect();
 		return true;
 	}
-	
+
 	/**
 	 * Redirect back to the requested page after logging in.
 	 * If the requested page was a special page, redirect to the main page.
