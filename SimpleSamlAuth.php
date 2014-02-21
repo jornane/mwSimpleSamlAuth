@@ -20,12 +20,12 @@ if ( !defined( 'MEDIAWIKI' ) ) {
 }
 
 $wgExtensionCredits['other'][] = array(
-    'path' => __FILE__,
-    'name' => 'SimpleSamlAuth',
-    'version' => 'GIT-master',
-    'author' => 'Yørn de Jong',
-    'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
-    'descriptionmsg' => 'simplesamlauth-desc'
+	'path' => __FILE__,
+	'name' => 'SimpleSamlAuth',
+	'version' => 'GIT-master',
+	'author' => 'Yørn de Jong',
+	'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
+	'descriptionmsg' => 'simplesamlauth-desc'
 );
 
 $wgExtensionMessagesFiles['SimpleSamlAuth'] = __DIR__ . '/SimpleSamlAuth.i18n.php';
