@@ -256,7 +256,7 @@ class SimpleSamlAuth {
 			}
 			else
 			{
-				// User doesn't exist and autocration is off
+				// User doesn't exist and autocreation is off
 				return false;
 			}
 		}
