@@ -205,10 +205,12 @@ class SimpleSamlAuth {
 						$this->as->logout(Title::newMainPage()->getFullUrl());
 					}
 				}
-			} elseif ($this->samlOnly && $_REQUEST['title'] === $lg->specialPage('Userlogin')) {
+			}
+			if ($this->samlOnly && $_REQUEST['title'] === $lg->specialPage('Userlogin')) {
 				$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
-				$result = false;
-				return false;
+				global $wgOut;
+				$wgOut->redirect($this->getReturnUrl());
+				return null;
 			}
 		}
 
