@@ -287,7 +287,8 @@ class SimpleSamlAuth {
 			}
 			else
 			{
-				// User doesn't exist and autocreation is off
+				trigger_error('User '.htmlspecialchars($attr[$this->usernameAttr][0]).
+					' doesn\'t exist and auto creation is off', E_USER_NOTICE);
 				return false;
 			}
 		}
