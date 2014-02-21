@@ -16,7 +16,7 @@ SimpleSamlAuth::registerHook( array(
 	'usernameAttr' => 'uid',
 	'realnameAttr' => 'cn',
 	'mailAttr' => 'mail',
-	'autocreate' => false,
+	'autoCreate' => false,
 	'readHook' => false, // if true, don't show "Login required" page, redirect right away
 	'autoMailConfirm' => false,
 	// 'postLogoutRedirect' => 'https://www.mediawiki.org/' // some URL, if commented out redirect to page you came from
@@ -55,7 +55,7 @@ Example: (this is the default)
 ### sspRoot
 *(default: simplesamlphp directory alongside SimpleSamlAuth.php)*  
 The location of the simpleSamlPhp installation.
-### autocreate
+### autoCreate
 *(default value: __false__)*  
 Whether users are created if they don't exist in Mediawiki yet.
 ### readHook

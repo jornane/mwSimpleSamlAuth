@@ -36,7 +36,7 @@ class SimpleSamlAuth {
 	protected $usernameAttr = 'uid';
 	protected $realnameAttr = 'cn';
 	protected $mailAttr = 'mail';
-	protected $autocreate = false;
+	protected $autoCreate = false;
 	protected $readHook = false;
 	protected $autoMailConfirm = false;
 	protected $sspRoot;
@@ -103,8 +103,14 @@ class SimpleSamlAuth {
 				. DIRECTORY_SEPARATOR
 				;
 		}
-		if (array_key_exists('autocreate', $config)) {
-			$this->autocreate = $config['autocreate'];
+		if (array_key_exists('autoCreate', $config)) {
+			$this->autoCreate = $config['autoCreate'];
+		} elseif (array_key_exists('autocreate', $config)) {
+			$this->autoCreate = $config['autocreate']; // Legacy
+			trigger_error(
+				'SimpleSamlAuth config key "autocreate" should be "autoCreate"',
+				E_USER_NOTICE
+			);
 		}
 		if (array_key_exists('readHook', $config)) {
 			$this->readHook = $config['readHook'];
@@ -216,7 +222,7 @@ class SimpleSamlAuth {
 
 	/**
 	 * Require a SAML assertion and log the corresponding user in.
-	 * If the user doesn't exist, and autocreate has been turned on in the config,
+	 * If the user doesn't exist, and auto create has been turned on in the config,
 	 * the user is created.
 	 *
 	 * Because this function requires a SAML assertion, it may redirect the user to the IdP and exit.
@@ -282,7 +288,7 @@ class SimpleSamlAuth {
 		$this->setGroups($u, $attr);
 
 		if ($u->getID() == 0) {
-			if ($this->autocreate) {
+			if ($this->autoCreate) {
 				$u->addToDatabase();
 			}
 			else
