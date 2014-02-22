@@ -269,7 +269,10 @@ class SimpleSamlAuth {
 			global $wgBlockDisablesLogin;
 			if (!$wgBlockDisablesLogin || !$user->isBlocked()) {
 				$attr = $this->as->getAttributes();
-				if (isset($attr[$this->usernameAttr]) && $attr[$this->usernameAttr] && strtolower($user->getName()) === strtolower(reset($attr[$this->usernameAttr]))) {
+				if (isset($attr[$this->usernameAttr])
+				&&  $attr[$this->usernameAttr] 
+				&&  strtolower($user->getName()) === strtolower(reset($attr[$this->usernameAttr]))
+				) {
 					wfDebug("User: logged in from SAML\n");
 					$result = true;
 					return true;
