@@ -15,8 +15,8 @@
  * @author Yørn de Jong
  */
 
-if ( !defined( 'MEDIAWIKI' ) ) {
-	die( 'This is a MediaWiki extension, and must be run from within MediaWiki.' );
+if (!defined('MEDIAWIKI')) {
+	die("This is a MediaWiki extension, and must be run from within MediaWiki.\n");
 }
 
 $wgExtensionCredits['other'][] = array(
@@ -56,6 +56,8 @@ class SimpleSamlAuth {
 
 	/**
 	 * Convenience function to make the config file prettier.
+	 *
+	 * @param $config mixed[] Configuration settings for the SimpleSamlAuth extension.
 	 */
 	public static function registerHook($config) {
 		global $wgHooks;
@@ -73,6 +75,8 @@ class SimpleSamlAuth {
 	/**
 	 * Construct a new object and register it in $wgHooks.
 	 * See README.md for possible values in $config.
+	 *
+	 * @param $config mixed[] Configuration settings for the SimpleSamlAuth extension.
 	 */
 	public function __construct($config) {
 		if (array_key_exists('authSource', $config)) {
@@ -129,7 +133,7 @@ class SimpleSamlAuth {
 			$this->postLogoutRedirect = $config['postLogoutRedirect'];
 		}
 
-		// Load the simpleSamlPhp framework
+		// Load the simpleSamlPhp service
 		require_once $this->sspRoot . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
 		$this->as = new SimpleSAML_Auth_Simple($this->authSource);
@@ -138,6 +142,14 @@ class SimpleSamlAuth {
 	/**
 	 * Disables preferences which are redundant while using an external authentication source.
 	 * Password change is always disabled, e-mail settings are enabled/disabled based on the configuration.
+	 *
+	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences
+	 *
+	 * @param $user User User whose preferences are being modified.
+	 *                   ignored by this method because it checks the SAML assertion instead.
+	 * @param &$preferences Preferences description array, to be fed to an HTMLForm object.
+	 *
+	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	function hookLimitPreferences($user, &$preferences) {
 		if ($this->as->isAuthenticated()) {
@@ -156,6 +168,12 @@ class SimpleSamlAuth {
 	 *
 	 * Note: When autoMailConfirm is true, but mailAttr is invalid,
 	 * users will have no way to confirm their e-mail address.
+	 *
+	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/SpecialPage_initList
+	 *
+	 * @param $pages string[] List of special pages in MediaWiki
+	 *
+	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	public function hookInitSpecialPages(&$pages) {
 		if ($this->samlOnly || $this->as->isAuthenticated()) {
@@ -170,8 +188,11 @@ class SimpleSamlAuth {
 	}
 
 	/**
+	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/UserLoginForm
+	 *
 	 * @param $template UserloginTemplate
-	 * @return bool
+	 *
+	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	function hookLoginForm(&$template) {
 		$template->set(
@@ -186,8 +207,12 @@ class SimpleSamlAuth {
 	 * Hooked function, if a SAML assertion exist,
 	 * log in the corresponding MediaWiki user or logout from SAML.
 	 *
+	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/UserLoadFromSession
+	 *
 	 * @param $user User MediaWiki User object
-	 * @param $result 
+	 * @param $result boolean a user is logged in
+	 *
+	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	public function hookLoadSession($user, &$result) {
 		if ($this->samlRequired) {
@@ -214,7 +239,11 @@ class SimpleSamlAuth {
 
 		$this->loadUser($user);
 
-		if ($user instanceof User && $user->isLoggedIn()) { // confusing name: actually checks that user exists in DB
+		/*
+		 * ->isLoggedIn is a confusing name:
+		 * it actually checks that user exists in DB
+		 */
+		if ($user instanceof User && $user->isLoggedIn()) {
 			global $wgBlockDisablesLogin;
 			if (!$wgBlockDisablesLogin || !$user->isBlocked()) {
 				$attr = $this->as->getAttributes();
@@ -237,6 +266,8 @@ class SimpleSamlAuth {
 	 *
 	 * This function is used to block access to the UserLogin page,
 	 * which users may visit due to cache.
+	 *
+	 * @return void function should not return
 	 */
 	protected function redirect() {
 		$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
@@ -244,6 +275,17 @@ class SimpleSamlAuth {
 		$wgOut->redirect($this->getReturnUrl());
 	}
 
+	/**
+	 * Trigger an error if an attribute contains more than one value.
+	 * This function should only be executed on attributes that are used for
+	 * username, real name and e-mail.
+	 *
+	 * @param $friendlyName string human-readable name of the attribute
+	 * @param $attributeName string name of the attribute in the SAML assertion
+	 * @param $attr string[][] SAML attributes from assertion
+	 *
+	 * @return void errors may be triggered on return
+	 */
 	protected static function checkAttribute($friendlyName, $attributeName, $attr) {
 		if (isset($attr[$attributeName]) && $attr[$attributeName]) {
 			if (count($attr[$attributeName]) != 1) {
@@ -270,7 +312,7 @@ class SimpleSamlAuth {
 	 *
 	 * @param $user MediaWiki user that must correspond to the SAML assertion
 	 *
-	 * @return void
+	 * @return void $user is modified on return
 	 */
 	protected function loadUser($user) {
 		if (!$this->as->isAuthenticated()) {
@@ -291,6 +333,10 @@ class SimpleSamlAuth {
 		$this->checkAttribute('Real name', $this->realnameAttr, $attr);
 		$this->checkAttribute('E-mail', $this->mailAttr, $attr);
 
+		/*
+		 * The temp user is created because ->load() doesn't override
+		 * the username, which can lead to incorrect capitalisation.
+		 */
 		$tempUser = User::newFromName(ucfirst(reset($attr[$this->usernameAttr])));
 		$tempUser->load();
 		$user->setRealName(reset($attr[$this->realnameAttr]));
@@ -331,6 +377,11 @@ class SimpleSamlAuth {
 
 	/**
 	 * Add groups based on the existence of attributes in the SAML assertion.
+	 *
+	 * @param $user User add MediaWiki permissions to this user from its SAML assertion
+	 * @param $attr string[][] SAML attributes from assertion
+	 *
+	 * @return void $user is modified on return
 	 */
 	public function setGroups($user, $attr) {
 		foreach($this->groupMap as $group => $rules) {
