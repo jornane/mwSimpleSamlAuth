@@ -1,14 +1,17 @@
 <?php
 /**
- * Main file for the SimpleSamlAuth extension.
+ * SimpleSamlAuth - GPL 3.0 licensed
+ * Copyright (C) 2014  Yørn de Jong
+ *
+ * SAML authentication class using SimpleSamlPhp.
+ *
+ * This class will log in users from SAML assertions received by SimpleSamlPhp.
+ * It does so by settings hooks in MediaWiki which override the session handling system
+ * and disable functionality that is redundant for federated logins.
  *
  * @file
  * @ingroup Extensions
  * @defgroup SimpleSamlAuth
- *
- * @link https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth Documentation
- * @link https://www.mediawiki.org/wiki/Extension_talk:SimpleSamlAuth Support
- * @link https://github.com/yorn/mwSimpleSamlAuth Source Code
  *
  * @license http://www.gnu.org/licenses/lgpl.html LGPL (GNU Lesser General Public License)
  * @copyright (C) 2014, Yørn de Jong
@@ -18,17 +21,6 @@
 if (!defined('MEDIAWIKI')) {
 	die("This is a MediaWiki extension, and must be run from within MediaWiki.\n");
 }
-
-$wgExtensionCredits['other'][] = array(
-	'path' => __FILE__,
-	'name' => 'SimpleSamlAuth',
-	'version' => 'GIT-master',
-	'author' => 'Yørn de Jong',
-	'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
-	'descriptionmsg' => 'simplesamlauth-desc'
-);
-
-$wgExtensionMessagesFiles['SimpleSamlAuth'] = __DIR__ . '/SimpleSamlAuth.i18n.php';
 
 class SimpleSamlAuth {
 
