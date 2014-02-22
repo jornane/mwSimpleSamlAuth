@@ -164,9 +164,8 @@ class SimpleSamlAuth {
 			if ($this->autoMailConfirm) {
 				unset($preferences['emailaddress']);
 			}
-			return true;
 		}
-		return false;
+		return true;
 	}
 	/**
 	 * Disables special pages which are redundant while using an external authentication source.
@@ -190,9 +189,8 @@ class SimpleSamlAuth {
 			if ($this->autoMailConfirm) {
 				unset($pages['ConfirmEmail']);
 			}
-			return true;
 		}
-		return false;
+		return true;
 	}
 
 	/**
@@ -232,6 +230,13 @@ class SimpleSamlAuth {
 	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	public function hookLoadSession($user, &$result) {
+		if ($result) {
+			// Another hook already logged in
+			if ($this->as->isAuthenticated()) {
+				$this->as->logout();
+			}
+			return true;
+		}
 		if ($this->samlRequired) {
 			$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
 		}
@@ -250,7 +255,7 @@ class SimpleSamlAuth {
 			}
 			if ($this->samlOnly && $_REQUEST['title'] === $lg->specialPage('Userlogin')) {
 				$this->redirect();
-				return null;
+				return 'UserLogin is disabled by SimpleSamlAuth.';
 			}
 		}
 
@@ -274,7 +279,7 @@ class SimpleSamlAuth {
 		if ($this->as->isAuthenticated()) {
 			$this->as->logout();
 		}
-		return null;
+		return true;
 	}
 
 	/**
