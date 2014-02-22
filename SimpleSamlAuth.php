@@ -207,9 +207,7 @@ class SimpleSamlAuth {
 				}
 			}
 			if ($this->samlOnly && $_REQUEST['title'] === $lg->specialPage('Userlogin')) {
-				$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
-				global $wgOut;
-				$wgOut->redirect($this->getReturnUrl());
+				$this->redirect();
 				return null;
 			}
 		}
@@ -231,6 +229,19 @@ class SimpleSamlAuth {
 			$this->as->logout();
 		}
 		return null;
+	}
+
+	/**
+	 * Redirect to the page the user was visiting,
+	 * or to the main page if no page could be determined.
+	 *
+	 * This function is used to block access to the UserLogin page,
+	 * which users may visit due to cache.
+	 */
+	protected function redirect() {
+		$this->as->requireAuth(array('returnTo' => $this->getReturnUrl()));
+		global $wgOut;
+		$wgOut->redirect($this->getReturnUrl());
 	}
 
 	protected static function checkAttribute($friendlyName, $attributeName, $attr) {
