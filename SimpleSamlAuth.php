@@ -1,6 +1,6 @@
 <?php
 /**
- * SimpleSamlAuth - GPL 3.0 licensed
+ * SimpleSamlAuth - LGPL 3.0 licensed
  * Copyright (C) 2014  Yørn de Jong
  *
  * SAML authentication MediaWiki extension using SimpleSamlPhp.
