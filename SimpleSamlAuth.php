@@ -39,6 +39,7 @@ class SimpleSamlAuth {
 	protected $autoCreate = false;
 	protected $samlRequired = false;
 	protected $samlOnly = false;
+	protected $samlSignup = false;
 	protected $autoMailConfirm = false;
 	protected $sspRoot;
 	protected $postLogoutRedirect;
@@ -126,6 +127,9 @@ class SimpleSamlAuth {
 		if ($this->samlRequired || array_key_exists('samlOnly', $config)) {
 			$this->samlOnly = $this->samlRequired || $config['samlOnly'];
 		}
+		if (array_key_exists('samlSignup', $config)) {
+			$this->samlSignup = !$this->samlOnly && $config['samlSignup'];
+		}
 		if (array_key_exists('autoMailConfirm', $config)) {
 			$this->autoMailConfirm = $config['autoMailConfirm'];
 		}
@@ -153,8 +157,10 @@ class SimpleSamlAuth {
 	 */
 	function hookLimitPreferences($user, &$preferences) {
 		if ($this->as->isAuthenticated()) {
-			unset($preferences['password']);
-			unset($preferences['rememberpassword']);
+			if (!$this->samlSignup) {
+				unset($preferences['password']);
+				unset($preferences['rememberpassword']);
+			}
 			if ($this->autoMailConfirm) {
 				unset($preferences['emailaddress']);
 			}
@@ -177,8 +183,10 @@ class SimpleSamlAuth {
 	 */
 	public function hookInitSpecialPages(&$pages) {
 		if ($this->samlOnly || $this->as->isAuthenticated()) {
-			unset($pages['ChangePassword']);
-			unset($pages['PasswordReset']);
+			if (!$this->samlSignup) {
+				unset($pages['ChangePassword']);
+				unset($pages['PasswordReset']);
+			}
 			if ($this->autoMailConfirm) {
 				unset($pages['ConfirmEmail']);
 			}
@@ -195,11 +203,20 @@ class SimpleSamlAuth {
 	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	function hookLoginForm(&$template) {
-		$template->set(
-			'extrafields',
-			'<a class="mw-ui-button mw-ui-constructive" href="'.htmlspecialchars($this->as->getLoginURL($this->getReturnUrl())).'">'.
-			wfMessage('simplesamlauth-login')->escaped().'</a>'
-		);
+		if ($this->samlOnly) {
+			$this->redirect();
+			return 'UserLogin is disabled by SimpleSamlAuth.';
+		}
+		$url = $this->as->getLoginURL($this->getReturnUrl());
+		if ($this->samlSignup) {
+			$template->set('createOrLoginHref', $url);
+		} else {
+			$template->set(
+				'extrafields',
+				'<a class="mw-ui-button mw-ui-constructive" href="'.htmlspecialchars($url).'">'.
+				wfMessage('simplesamlauth-login')->escaped().'</a>'
+			);
+		}
 		return true;
 	}
 
