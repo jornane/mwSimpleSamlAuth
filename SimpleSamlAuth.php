@@ -280,7 +280,7 @@ class SimpleSamlAuth {
 		$this->checkAttribute('Real name', $this->realnameAttr, $attr);
 		$this->checkAttribute('E-mail', $this->mailAttr, $attr);
 
-		$tempUser = User::newFromName(reset($attr[$this->usernameAttr]));
+		$tempUser = User::newFromName(ucfirst(reset($attr[$this->usernameAttr])));
 		$tempUser->load();
 		$user->setRealName(reset($attr[$this->realnameAttr]));
 		$user->setEmail(reset($attr[$this->mailAttr]));
