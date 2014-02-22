@@ -405,10 +405,10 @@ class SimpleSamlAuth {
 	 *
 	 * @return void $user is modified on return
 	 */
-	public function setGroups($user, $attr) {
+	protected function setGroups($user, $attr) {
 		foreach($this->groupMap as $group => $rules) {
 			foreach($rules as $attrName => $needles) {
-				if (!isset($attr['attrName'])) {
+				if (!isset($attr[$attrName])) {
 					continue;
 				}
 				foreach($needles as $needle) {
