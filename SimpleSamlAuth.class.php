@@ -147,7 +147,7 @@ class SimpleSamlAuth {
 	 *
 	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
-	function hookLimitPreferences($user, &$preferences) {
+	public function hookLimitPreferences($user, &$preferences) {
 		if ($this->as->isAuthenticated()) {
 			if (!$this->samlSignup) {
 				unset($preferences['password']);
@@ -192,7 +192,7 @@ class SimpleSamlAuth {
 	 *
 	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
-	function hookLoginForm(&$template) {
+	public function hookLoginForm(&$template) {
 		if ($this->samlOnly) {
 			$this->redirect();
 			return 'UserLogin is disabled by SimpleSamlAuth.';
