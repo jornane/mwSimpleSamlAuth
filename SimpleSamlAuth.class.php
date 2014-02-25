@@ -82,12 +82,12 @@ class SimpleSamlAuth {
 	 */
 	public static function hookLimitPreferences($user, &$preferences) {
 		self::init();
-		global $wgSamlConfirmMail, $wgSamlRequirement;
+		global $wgSamlRequirement, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
 
 		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
 			unset($preferences['password']);
 			unset($preferences['rememberpassword']);
-			if ($wgSamlConfirmMail) {
+			if (isset($wgSamlMailAttr) && isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
 				unset($preferences['emailaddress']);
 			}
 		}
@@ -109,12 +109,12 @@ class SimpleSamlAuth {
 	 */
 	public static function hookInitSpecialPages(&$pages) {
 		self::init();
-		global $wgSamlConfirmMail, $wgSamlRequirement;
+		global $wgSamlRequirement, $wgSamlMailAttr, $wgSamlConfirmMail;
 
 		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
 			unset($pages['ChangePassword']);
 			unset($pages['PasswordReset']);
-			if ($wgSamlConfirmMail) {
+			if (isset($wgSamlMailAttr) && isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
 				unset($pages['ConfirmEmail']);
 			}
 		}
