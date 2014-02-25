@@ -342,16 +342,6 @@ class SimpleSamlAuth {
 		 */
 		$tempUser = User::newFromName(ucfirst(reset($attr[$wgSamlUsernameAttr])));
 		$tempUser->load();
-		if (isset($wgSamlRealnameAttr) && isset($attr[$wgSamlRealnameAttr])) {
-			$user->setRealName(reset($attr[$wgSamlRealnameAttr]));
-		}
-		if (isset($wgSamlMailAttr) && isset($attr[$wgSamlMailAttr])) {
-			$user->setEmail(reset($attr[$wgSamlMailAttr]));
-			if ($wgSamlConfirmMail) {
-				$user->ConfirmEmail();
-			}
-		}
-		self::setGroups($user, $attr);
 		$id = $tempUser->getId();
 		if ($id) {
 			$user->setId($id);
@@ -366,6 +356,23 @@ class SimpleSamlAuth {
 				);
 			}
 		}
+
+		$changed = false;
+		if (isset($wgSamlRealnameAttr) && isset($attr[$wgSamlRealnameAttr]) && $user->getRealName() !== reset($attr[$wgSamlRealnameAttr])) {
+			$changed = true;
+			$user->setRealName(reset($attr[$wgSamlRealnameAttr]));
+		}
+		if (isset($wgSamlMailAttr) && isset($attr[$wgSamlMailAttr]) && $user->getEmail() !== reset($attr[$wgSamlMailAttr])) {
+			$changed = true;
+			$user->setEmail(reset($attr[$wgSamlMailAttr]));
+			if (isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
+				$user->ConfirmEmail();
+			}
+		}
+		if ($changed) {
+			$user->saveSettings();
+		}
+		self::setGroups($user, $attr);
 	}
 
 	/**
