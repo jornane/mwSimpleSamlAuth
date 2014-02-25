@@ -65,5 +65,6 @@ $messages['fy'] = array(
  */
 $messages['et'] = array(
 	'simplesamlauth-desc' => 'Võimaldab SAML-iga autentimise kasutades [//simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Logi sisse SAMLi kaudu',
 );
 
