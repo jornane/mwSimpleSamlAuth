@@ -87,6 +87,9 @@ class SimpleSamlAuth {
 		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
 			unset($preferences['password']);
 			unset($preferences['rememberpassword']);
+			if (isset($wgSamlRealnameAttr)) {
+				unset($preferences['realname']);
+			}
 			if (isset($wgSamlMailAttr) && isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
 				unset($preferences['emailaddress']);
 			}
