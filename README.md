@@ -1,69 +1,122 @@
 # SAML plugin for Mediawiki
 Requires [simpleSamlPhp](http://simplesamlphp.org) and PHP >= 5.3. Tested on Mediawiki 1.15 and higher.
 
+## Glossary
+* **SimpleSamlAuth** This extension, uses *SimpleSamlPhp* to allow SAML login in *MediaWiki*.
+* **SimpleSamlPhp** Open source lightweight SAML implementation by UNINETT.
+* **MediaWiki** Open source Wiki software.
+
+## Preparation
+* Install SimpleSamlPhp on the same domain as your MediaWiki installation.
+* In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works. Also make sure that the attributes you see there make sense. 
+
+You may keep the page showing the attributes open for reference, when you edit `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
+
+
+If you encounter problems during the preparation, [look here](http://simplesamlphp.org/support) for support.
+
 ## Installation
 * Clone this repository into your Mediawikis *extensions* directory, and call it **SimpleSamlAuth.php**.  ```git clone git@github.com:yorn/mwSimpleSamlAuth.git SimpleSamlAuth```
-* Install simpleSamlPhp. Keep in mind that the **www** folder must be made available from the web using an alias or symlink. Update the **sspRoot** config variable with the SimpleSamlPhp location on the filesystem. *See the simpleSamlPhp documentation for instructions on how to install simpleSamlPhp.*
-* Configure simpleSamlPhp so that it can authenticate against your authentication source. *Again see the simpleSamlPhp documentation on how to do this.*
 * Add the following lines to your **LocalSettings.php** in your Mediawiki installation:
 
 ```php
 require_once "$IP/extensions/SimpleSamlAuth/SimpleSamlAuth.php";
-SimpleSamlAuth::registerHook( array(
-	// change these values to match your setup
-	'sspRoot' => '../simplesamlphp',
-	'authSource' => 'default-sp',
-	'usernameAttr' => 'uid',
-	'realnameAttr' => 'cn',
-	'mailAttr' => 'mail',
-	'autoCreate' => false,
-	'readHook' => false, // if true, don't show "Login required" page, redirect right away
-	'autoMailConfirm' => false,
-	// 'postLogoutRedirect' => 'https://www.mediawiki.org/' // some URL, if commented out redirect to page you came from
-	)
+
+// SAML_OPTIONAL // SAML_LOGIN_ONLY // SAML_REQUIRED //
+$wgSamlRequirement = SAML_OPTIONAL;
+// Should users be created if they don't exist in the database yet?
+$wgSamlCreateUser = FALSE;
+// Auto confirm e-mail for SAML users?
+// Use together with $wgEmailAuthentication
+$wgSamlConfirmMail = FALSE;
+
+// SAML attributes
+$wgSamlUsernameAttr = 'uid';
+$wgSamlRealnameAttr = 'cn';
+$wgSamlMailAttr = 'mail';
+
+// SimpleSamlPhp settings
+$wgSamlAuthSource = 'default-sp';
+$wgSamlPostLogoutRedirect = NULL;
+$wgSamlSspRoot = rtrim(__DIR__, DIRECTORY_SEPARATOR)
+               . DIRECTORY_SEPARATOR
+               . 'simplesamlphp'
+               . DIRECTORY_SEPARATOR
+               ;
+
+// Array: [MediaWiki group][SAML attribute name][SAML expected value]
+// If the SAML assertion matches, the user is added to the Mediawiki group
+$wgSamlGroupMap = array(
+	'sysop' => array(
+		'groups' => array('admin'),
+	),
 );
 ```
 
 ## Configuration
-The configuration is an indexed array, with the following possible keys (other keys are ignored):
-### authSource
-*(default value: __default-sp__)*  
-The name of the desired authSource in simpleSamlPhp. For SAML authentication, this is default-sp.
-### usernameAttr
-*(default value: __uid__)*  
-The name of the attribute which contains the username. Use the **Test configured authentication sources** feature under **Authentication** in simpleSamlPhp if you are unsure.
-### realnameAttr
-*(default value: __cn__)*  
-The name of the attribute which contains the real name of the user.
-### mailAttr
-*(default value: __mail__)*  
-The name of the attribute which contains the e-mail address of the user.
-### groupMap
-*(default: if the __groups__ attribute contains __admin__, the user is added to the __sysop__ and __bureaucrat__ Mediawiki groups)*  
-Rules to add the user to Mediawiki groups, based on SAML attributes.
-Example: (this is the default)
+Modify the variables starting with *$wgSaml* to configure the extension. Some important variables:
+
+### $wgSamlRequirement
+This variable tells the extension how MediaWiki should behave. There are three options:
+
+|| optional | login_only | required |
+|--:|:--|:--|:--|
+| Allow login through SAML | ✓ | ✓ | ✓ |
+| Update user's real name and e-mail | ✓ | ✓ | ✓ |
+| Prevent creation of local accounts | | ✓ | ✓ |
+| Prevent login with local account | | ✓ | ✓ |
+| Prevent anonymous browsing | | | ✓ |
+| Redirect to login immediatly | | | ✓ |
+
+You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them. The only exception is that  `$wgSamlCreateUser = TRUE` will have priority over `$wgGroupPermissions['*']['createaccount'] = FALSE`.
+
+### $wgSamlConfirmMail
+This variable tells the extension that the e-mail address that is set from the SAML assertion must be marked as confirmed. Normally, e-mail confirmation happens by sending an e-mail to the user which contains a link that must be clicked to proof the user really owns the address, but this option allows users logging in through SAML to skip this step, while local users still have to confirm by clicking a link in an e-mail.
+
+This option doesn't make much sense outside `SAML_OPTIONAL`, because when every user must log in through SAML, it's easier to just set `$wgEmailAuthentication = FALSE`.
+
+### $wgSamlAuthSource
+This is the name of the AuthSource you configured in SimpleSamlPhp. You can easily find it by going to the SimpleSamlPhp installation page and going to *Authentication* -> *Test configured authentication sources*. The word you have to click there is the name of your AuthSource. For SAML sessions, the standard preconfigured name in SimpleSamlPhp is `default-sp` and this is also what SimpleSamlAuth will guess if you omit the variable.
+
+### $wgSamlPostLogoutRedirect
+This is an URL where users are redirected when they log out from the MediaWiki installation. Generally, for a `SAML_REQUIRED` setup you want to set this to a landing page (intranet, for example). For any other setup, you may not want to set this to allow a user to continue browsing the Wiki anonymously when logging out.
+
+### $wgSamlGroupMap
+This is a list of rules used to add users to MediaWiki groups based on their SAML attributes. It is an array of three layers deep:
+
+* Name of the MediaWiki group (for example `sysop`)
+* Name of a SAML attribute (for example `groups`)
+* Possible value for the SAML attribute (for example `admin`)
 
 ```php
-'groupMap' => array (
-	'sysop' => array (
+$wgSamlGroupMap = array(
+	'sysop' => array(
 		'groups' => array('admin'),
 	),
-	'bureaucrat' => array (
-		'groups' => array('admin'),
-	),
+);
 ```
-### sspRoot
-*(default: simplesamlphp directory alongside SimpleSamlAuth.php)*  
-The location of the simpleSamlPhp installation.
-### autoCreate
-*(default value: __false__)*  
-Whether users are created if they don't exist in Mediawiki yet.
-### readHook
-*(default value: __false__, requires Mediawiki 1.19 or newer)*  
-Redirect users to the login page if they experience a permission error which prevents reading the page. This is only useful on wikis that are configured against anonymous read access.
-### postLogoutRedirect
-*(default value: current page or main page)*  
-Redirect users to this URL after they logout.
-### autoMailConfirm
-*(default value: __false__)*  
-When logging in, the Mediawiki user will automatically get is e-mail address confirmed. Will only work together with *mailAttr*. Will not hide the activate button on Mediawiki <= 1.16, see also [$wgEmailAuthentication](https://www.mediawiki.org/wiki/Manual:$wgEmailAuthentication).
+An array as illustrated here will add users to the `sysop` MediaWiki group, if they have a SAML attribute named `groups` with at least a value `admin`. If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/yorn/sspmod_role).
+
+### SimpleSamlAuth::preload();
+Add this line if you need/want to run SimpleSamlPhp with `'store.type' => 'phpsession'`. This line should be added to **LocalSettings.php** *after* the variable assignments.
+
+The `preload()` function will start SimpleSamlPhp rightaway, allowing it to read session information before MediaWiki does.
+
+## Known Issues
+### [State Information Lost](https://code.google.com/p/simplesamlphp/wiki/LostState)
+This problem is caused by MediaWiki and SimpleSamlPhp fighting over the PHP Session system, and SimpleSamlPhp losing. There are two ways to solve this problem:
+
+* In `config.php` in your SimpleSamlPhp installation, change `'store.type' => 'phpsession'` to another backend. Memcache is very easy to set up.
+* Add `SimpleSamlAuth::preload();` at the *end* of **LocalSettings.php**. This will give SimpleSamlPhp an advantage reading the session information.
+
+### SAML users can edit their e-mail address
+Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences). Ubuntu 12.04 LTS comes with MediaWiki 1.15. [WikiMedia recommends against using the Ubuntu-provided version of MediaWiki](http://www.mediawiki.org/wiki/Manual:Running_MediaWiki_on_Ubuntu).
+
+### E-mail addresses are not automatically confirmed
+SimpleSamlAuth *only* confirms e-mail addresses it has set itself. Check that you configured `$wgSamlMailAttr` correctly.
+
+### SAML users overwrite MediaWiki users / SAML users can reset their password and become a local account
+In MediaWiki, there is not really a difference between local accounts and remote accounts. [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now. SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute. If it doesn't exist, and `$wgSamlCreateUser` is set, the user is created. A created user will have no password, but will be able to reset it if a valid e-mail address has been set.
+
+### Other issue?
+Please report it on the project's [GitHub issues page](https://github.com/yorn/mwSimpleSamlAuth/issues).
