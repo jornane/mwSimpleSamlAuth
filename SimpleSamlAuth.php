@@ -34,3 +34,36 @@ $wgExtensionCredits['other'][] = array(
 	'descriptionmsg' => 'simplesamlauth-desc'
 );
 
+$wgHooks['UserLoadFromSession'][]  = 'SimpleSamlAuth::hookLoadSession';
+$wgHooks['GetPreferences'][]       = 'SimpleSamlAuth::hookLimitPreferences';
+$wgHooks['SpecialPage_initList'][] = 'SimpleSamlAuth::hookInitSpecialPages';
+$wgHooks['UserLoginForm'][]        = 'SimpleSamlAuth::hookLoginForm';
+$wgHooks['UserLogoutComplete'][]   = 'SimpleSamlAuth::hookLogout';
+$wgHooks['PersonalUrls'][]         = 'SimpleSamlAuth::hookPersonalUrls';
+
+define('SAML_OPTIONAL', 0);
+define('SAML_LOGIN_ONLY', 1);
+define('SAML_REQUIRED', 2);
+
+$wgSamlRequirement = SAML_OPTIONAL;
+$wgSamlCreateUser = FALSE;
+$wgSamlConfirmMail = FALSE;
+
+$wgSamlAuthSource = 'default-sp';
+$wgSamlPostLogoutRedirect = NULL;
+$wgSamlSspRoot = rtrim(__DIR__, DIRECTORY_SEPARATOR)
+               . DIRECTORY_SEPARATOR
+               . 'simplesamlphp'
+               . DIRECTORY_SEPARATOR
+               ;
+
+$wgSamlGroupMap = array(
+	'sysop' => array(
+		'groups' => array('admin'),
+	),
+);
+
+
+$wgSamlUsernameAttr = 'uid';
+$wgSamlRealnameAttr = 'cn';
+$wgSamlMailAttr = 'mail';

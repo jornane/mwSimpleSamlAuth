@@ -18,6 +18,7 @@ $messages = array();
 $messages['en'] = array(
 	'simplesamlauth-desc' => 'Enables SAML authentication using [https://simplesamlphp.org/ SimpleSAMLphp].',
 	'simplesamlauth-login' => 'Log in using SAML',
+	'simplesamlauth-pagedisabled' => 'This page is disabled by the [//github.com/yorn/mwSimpleSamlAuth SimpleSamlAuth] extension.',
 );
 
 /** German (Deutsch)
