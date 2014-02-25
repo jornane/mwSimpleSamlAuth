@@ -254,26 +254,20 @@ class SimpleSamlAuth {
 	public static function hookPersonalUrls(array &$personal_urls) {
 		global $wgSamlRequirement;
 
-		if ($wgSamlRequirement >= SAML_LOGIN_ONLY) {
-			if (isset($personal_urls['logout'])) {
-				if (isset($wgSamlPostLogoutRedirect)) {
-					$personal_urls['logout']['href'] = self::$as->getLogoutURL($wgSamlPostLogoutRedirect);
-				} else {
-					$personal_urls['logout']['href'] = self::$as->getLogoutURL();
-				}
-			}
-			if (isset($personal_urls['login'])) {
-				$personal_urls['login']['href'] = self::$as->getLoginURL();
-			}
-			if (isset($personal_urls['anonlogin'])) {
-				$personal_urls['anonlogin']['href'] = self::$as->getLoginURL();
-			}
-		} elseif (self::$as->isAuthenticated()) {
+		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
 			if (isset($personal_urls['logout'])) {
 				if (isset($wgSamlPostLogoutRedirect)) {
 					$personal_urls['logout']['href'] = self::$as->getLogoutURL($wgSamlPostLogoutRedirect);
 				} else {
 					$personal_urls['logout']['href'] = self::$as->getLogoutURL($personal_urls['logout']['href']);
+				}
+			}
+			if (!self::$as->isAuthenticated()) {
+				if (isset($personal_urls['login'])) {
+					$personal_urls['login']['href'] = self::$as->getLoginURL();
+				}
+				if (isset($personal_urls['anonlogin'])) {
+					$personal_urls['anonlogin']['href'] = self::$as->getLoginURL();
 				}
 			}
 		}
