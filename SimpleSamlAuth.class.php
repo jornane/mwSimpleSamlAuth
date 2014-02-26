@@ -255,7 +255,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	public static function hookPersonalUrls(array &$personal_urls) {
-		global $wgSamlRequirement;
+		global $wgSamlRequirement, $wgRequest;
 
 		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
 			if (isset($personal_urls['logout'])) {
@@ -266,11 +266,10 @@ class SimpleSamlAuth {
 				}
 			}
 			if (!self::$as->isAuthenticated()) {
-				if (isset($personal_urls['login'])) {
-					$personal_urls['login']['href'] = self::$as->getLoginURL();
-				}
-				if (isset($personal_urls['anonlogin'])) {
-					$personal_urls['anonlogin']['href'] = self::$as->getLoginURL();
+				foreach(array('login', 'anonlogin') as $link) {
+					if (isset($personal_urls['link'])) {
+						$personal_urls['link']['href'] = self::$as->getLoginURL($wgRequest->getVal('returnto'));
+					}
 				}
 			}
 		}
