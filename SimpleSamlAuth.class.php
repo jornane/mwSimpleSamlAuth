@@ -255,7 +255,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
 	 */
 	public static function hookPersonalUrls(array &$personal_urls) {
-		global $wgSamlRequirement, $wgRequest;
+		global $wgSamlRequirement, $wgSamlPostLogoutRedirect, $wgRequest;
 
 		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
 			if (isset($personal_urls['logout'])) {
