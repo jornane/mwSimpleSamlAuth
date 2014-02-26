@@ -267,8 +267,13 @@ class SimpleSamlAuth {
 			}
 			if (!self::$as->isAuthenticated()) {
 				foreach(array('login', 'anonlogin') as $link) {
-					if (isset($personal_urls['link'])) {
-						$personal_urls['link']['href'] = self::$as->getLoginURL($wgRequest->getVal('returnto'));
+					if (isset($personal_urls[$link])) {
+						if ($returnTo = $wgRequest->getVal('returnto')) {
+							$url = Title::newFromText($wgRequest->getVal('returnto'))->getFullUrl();
+							$personal_urls[$link]['href'] = self::$as->getLoginURL($url);
+						} else {
+							$personal_urls[$link]['href'] = self::$as->getLoginURL();
+						}
 					}
 				}
 			}
