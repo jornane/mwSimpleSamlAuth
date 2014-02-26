@@ -261,6 +261,9 @@ class SimpleSamlAuth {
 			if (isset($personal_urls['logout'])) {
 				if (isset($wgSamlPostLogoutRedirect)) {
 					$personal_urls['logout']['href'] = self::$as->getLogoutURL($wgSamlPostLogoutRedirect);
+				} elseif ($wgSamlRequirement >= SAML_REQUIRED) {
+					$personal_urls['logout']['href'] =
+						self::$as->getLogoutURL(self::$as->getLoginURL(Title::newMainPage()->getFullUrl()));
 				} else {
 					$personal_urls['logout']['href'] = self::$as->getLogoutURL($personal_urls['logout']['href']);
 				}
