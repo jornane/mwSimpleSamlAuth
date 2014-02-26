@@ -63,7 +63,6 @@ $wgSamlGroupMap = array(
 	),
 );
 
-
 $wgSamlUsernameAttr = 'uid';
 $wgSamlRealnameAttr = 'cn';
 $wgSamlMailAttr = 'mail';
