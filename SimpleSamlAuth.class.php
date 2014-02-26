@@ -320,7 +320,7 @@ class SimpleSamlAuth {
 		if (!self::$as->isAuthenticated()) {
 			return;
 		}
-		global $wgSamlUsernameAttr, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
+		global $wgSamlUsernameAttr, $wgSamlCreateUser, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
 		$attr = self::$as->getAttributes();
 
 		if (!isset($attr[$wgSamlUsernameAttr]) || !$attr[$wgSamlUsernameAttr]) {
