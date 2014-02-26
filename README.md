@@ -1,23 +1,31 @@
 # SAML plugin for Mediawiki
-Requires [simpleSamlPhp](http://simplesamlphp.org) and PHP >= 5.3. Tested on Mediawiki 1.15 and higher.
 
 ## Glossary
 * **SimpleSamlAuth** This extension, uses *SimpleSamlPhp* to allow SAML login in *MediaWiki*.
 * **SimpleSamlPhp** Open source lightweight SAML implementation by UNINETT.
 * **MediaWiki** Open source Wiki software.
 
+## Requirements
+* [SimpleSamlPhp](//simplesamlphp.org) (tested on 1.11 and newer)
+* [MediaWiki](//mediawiki.org) (1.15 works, 1.16 or newer required for some features)
+
 ## Preparation
 * Install SimpleSamlPhp on the same domain as your MediaWiki installation.
-* In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works. Also make sure that the attributes you see there make sense. 
+* In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works. Also make sure that the attributes make sense. 
 
-You may keep the page showing the attributes open for reference, when you edit `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
+You may keep the attributes page open for later reference, for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
 
 
-If you encounter problems during the preparation, [look here](http://simplesamlphp.org/support) for support.
+If you encounter problems during the preparation, please [look here](http://simplesamlphp.org/support) for support. Only report bugs for SimpleSamlAuth when the preparation steps work for you.
 
 ## Installation
-* Clone this repository into your Mediawikis *extensions* directory, and call it **SimpleSamlAuth.php**.  ```git clone git@github.com:yorn/mwSimpleSamlAuth.git SimpleSamlAuth```
-* Add the following lines to your **LocalSettings.php** in your Mediawiki installation:
+* Clone this repository into your MediaWikis *extensions* directory, and call it **SimpleSamlAuth**.
+
+```bash
+git clone git@github.com:yorn/mwSimpleSamlAuth.git SimpleSamlAuth
+```
+
+* Add the following lines to **LocalSettings.php** in your Mediawiki installation:
 
 ```php
 require_once "$IP/extensions/SimpleSamlAuth/SimpleSamlAuth.php";
@@ -59,14 +67,14 @@ Modify the variables starting with *$wgSaml* to configure the extension. Some im
 ### $wgSamlRequirement
 This variable tells the extension how MediaWiki should behave. There are three options:
 
-|| optional | login_only | required |
-|--:|:--|:--|:--|
-| Allow login through SAML | ✓ | ✓ | ✓ |
-| Update user's real name and e-mail | ✓ | ✓ | ✓ |
-| Prevent creation of local accounts | | ✓ | ✓ |
-| Prevent login with local account | | ✓ | ✓ |
-| Prevent anonymous browsing | | | ✓ |
-| Redirect to login immediatly | | | ✓ |
+|                                    | optional | login_only | required |
+|-----------------------------------:|:--------:|:----------:|:--------:|
+|           Allow login through SAML |    ✓     |     ✓      |    ✓     |
+| Update user's real name and e-mail |    ✓     |     ✓      |    ✓     |
+| Prevent creation of local accounts |          |     ✓      |    ✓     |
+|   Prevent login with local account |          |     ✓      |    ✓     |
+|         Prevent anonymous browsing |          |            |    ✓     |
+|       Redirect to login immediatly |          |            |    ✓     |
 
 You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them. The only exception is that  `$wgSamlCreateUser = TRUE` will have priority over `$wgGroupPermissions['*']['createaccount'] = FALSE`.
 
@@ -110,13 +118,18 @@ This problem is caused by MediaWiki and SimpleSamlPhp fighting over the PHP Sess
 * Add `SimpleSamlAuth::preload();` at the *end* of **LocalSettings.php**. This will give SimpleSamlPhp an advantage reading the session information.
 
 ### SAML users can edit their e-mail address
-Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences). Ubuntu 12.04 LTS comes with MediaWiki 1.15. [WikiMedia recommends against using the Ubuntu-provided version of MediaWiki](http://www.mediawiki.org/wiki/Manual:Running_MediaWiki_on_Ubuntu).
+Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences).
+Ubuntu 12.04 LTS comes with MediaWiki 1.15.
+[WikiMedia recommends against using the Ubuntu-provided version of MediaWiki.](http://www.mediawiki.org/wiki/Manual:Running_MediaWiki_on_Ubuntu)
 
 ### E-mail addresses are not automatically confirmed
-SimpleSamlAuth *only* confirms e-mail addresses it has set itself. Check that you configured `$wgSamlMailAttr` correctly.
+SimpleSamlAuth will *only* confirm e-mail addresses that it has set itself.
+Make sure that you have configured `$wgSamlMailAttr` correctly.
 
-### SAML users overwrite MediaWiki users / SAML users can reset their password and become a local account
-In MediaWiki, there is not really a difference between local accounts and remote accounts. [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now. SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute. If it doesn't exist, and `$wgSamlCreateUser` is set, the user is created. A created user will have no password, but will be able to reset it if a valid e-mail address has been set.
+### SAML users overwrite MediaWiki users / SAML users can reset their password and become a local user
+There is not really a difference between local accounts and remote accounts in Mediawiki. [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now.
+
+Upon SAML retrieval of a SAML assertion, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created. This newly created user will have no password, but will be able to reset its password if a valid e-mail address has been set.
 
 ### Other issue?
 Please report it on the project's [GitHub issues page](https://github.com/yorn/mwSimpleSamlAuth/issues).
