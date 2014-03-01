@@ -44,13 +44,9 @@ $wgSamlRealnameAttr = 'cn';
 $wgSamlMailAttr = 'mail';
 
 // SimpleSamlPhp settings
+$wgSamlSspRoot = '/usr/share/simplesamlphp';
 $wgSamlAuthSource = 'default-sp';
 $wgSamlPostLogoutRedirect = NULL;
-$wgSamlSspRoot = rtrim(__DIR__, DIRECTORY_SEPARATOR)
-               . DIRECTORY_SEPARATOR
-               . 'simplesamlphp'
-               . DIRECTORY_SEPARATOR
-               ;
 
 // Array: [MediaWiki group][SAML attribute name][SAML expected value]
 // If the SAML assertion matches, the user is added to the Mediawiki group
