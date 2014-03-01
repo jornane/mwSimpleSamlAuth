@@ -61,7 +61,7 @@ $wgSamlGroupMap = array(
 Modify the variables starting with *$wgSaml* to configure the extension. Some important variables:
 
 ### $wgSamlRequirement
-This variable tells the extension how MediaWiki should behave. There are three options:
+This variable tells the extension how MediaWiki should behave. There are three options; `SAML_OPTIONAL` `SAML_LOGIN_ONLY` `SAML_REQUIRED`:
 
 |                                    | optional | login_only | required |
 |-----------------------------------:|:--------:|:----------:|:--------:|
