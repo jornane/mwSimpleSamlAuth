@@ -22,8 +22,10 @@ if (!defined('MEDIAWIKI')) {
 	die("This is a MediaWiki extension, and must be run from within MediaWiki.\n");
 }
 
-$wgExtensionMessagesFiles['SimpleSamlAuth'] = __DIR__ . DIRECTORY_SEPARATOR . 'SimpleSamlAuth.i18n.php';
-$wgAutoloadClasses['SimpleSamlAuth'] = __DIR__ . DIRECTORY_SEPARATOR . 'SimpleSamlAuth.class.php';
+$wgExtensionMessagesFiles['SimpleSamlAuth'] =
+	__DIR__ . DIRECTORY_SEPARATOR . 'SimpleSamlAuth.i18n.php';
+$wgAutoloadClasses['SimpleSamlAuth'] =
+	__DIR__ . DIRECTORY_SEPARATOR . 'SimpleSamlAuth.class.php';
 
 $wgExtensionCredits['other'][] = array(
 	'path' => __FILE__,
@@ -46,16 +48,16 @@ define('SAML_LOGIN_ONLY', 1);
 define('SAML_REQUIRED', 2);
 
 $wgSamlRequirement = SAML_OPTIONAL;
-$wgSamlCreateUser = FALSE;
-$wgSamlConfirmMail = FALSE;
+$wgSamlCreateUser = false;
+$wgSamlConfirmMail = false;
 
 $wgSamlAuthSource = 'default-sp';
-$wgSamlPostLogoutRedirect = NULL;
 $wgSamlSspRoot = rtrim(__DIR__, DIRECTORY_SEPARATOR)
                . DIRECTORY_SEPARATOR
                . 'simplesamlphp'
                . DIRECTORY_SEPARATOR
                ;
+$wgSamlPostLogoutRedirect = null;
 
 $wgSamlGroupMap = array(
 	'sysop' => array(

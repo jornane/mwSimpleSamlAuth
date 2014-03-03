@@ -18,8 +18,8 @@
  * @author Yørn de Jong
  */
 
-if (!defined('MEDIAWIKI')) {
-	die("This is a MediaWiki extension, and must be run from within MediaWiki.\n");
+if ( !defined( 'MEDIAWIKI' ) ) {
+	die( "This is a MediaWiki extension, and must be run from within MediaWiki.\n" );
 }
 
 class SimpleSamlAuth {
@@ -39,17 +39,17 @@ class SimpleSamlAuth {
 	 * @return void
 	 */
 	private static function init() {
-		if (self::$initialised) {
+		if ( self::$initialised ) {
 			return;
 		}
 
 		global $wgSamlSspRoot, $wgSamlAuthSource;
 
 		// Load the simpleSamlPhp service
-		require_once rtrim($wgSamlSspRoot, DIRECTORY_SEPARATOR)
-		. DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
+		require_once rtrim( $wgSamlSspRoot, DIRECTORY_SEPARATOR ) .
+			DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
-		self::$as = new SimpleSAML_Auth_Simple($wgSamlAuthSource);
+		self::$as = new SimpleSAML_Auth_Simple( $wgSamlAuthSource );
 
 		self::$initialised = true;
 	}
@@ -70,7 +70,8 @@ class SimpleSamlAuth {
 
 	/**
 	 * Disables preferences which are redundant while using an external authentication source.
-	 * Password change is always disabled, e-mail settings are enabled/disabled based on the configuration.
+	 * Password change is always disabled,
+	 * e-mail settings are enabled/disabled based on the configuration.
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences
 	 *
@@ -78,20 +79,20 @@ class SimpleSamlAuth {
 	 *                   ignored by this method because it checks the SAML assertion instead.
 	 * @param &$preferences Preferences description array, to be fed to an HTMLForm object.
 	 *
-	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookLimitPreferences($user, &$preferences) {
+	public static function hookLimitPreferences( $user, &$preferences ) {
 		self::init();
 		global $wgSamlRequirement, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
 
-		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
-			unset($preferences['password']);
-			unset($preferences['rememberpassword']);
-			if (isset($wgSamlRealnameAttr)) {
-				unset($preferences['realname']);
+		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
+			unset( $preferences['password'] );
+			unset( $preferences['rememberpassword'] );
+			if ( isset( $wgSamlRealnameAttr ) ) {
+				unset( $preferences['realname'] );
 			}
-			if (isset($wgSamlMailAttr) && isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
-				unset($preferences['emailaddress']);
+			if ( isset( $wgSamlMailAttr ) && isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
+				unset( $preferences['emailaddress'] );
 			}
 		}
 
@@ -99,7 +100,8 @@ class SimpleSamlAuth {
 	}
 	/**
 	 * Disables special pages which are redundant while using an external authentication source.
-	 * Password change is always disabled, e-mail confirmation is disabled when autoconfirm is disabled.
+	 * Password change is always disabled,
+	 * e-mail confirmation is disabled when autoconfirm is disabled.
 	 *
 	 * Note: When autoMailConfirm is true, but mailAttr is invalid,
 	 * users will have no way to confirm their e-mail address.
@@ -108,17 +110,17 @@ class SimpleSamlAuth {
 	 *
 	 * @param $pages string[] List of special pages in MediaWiki
 	 *
-	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookInitSpecialPages(&$pages) {
+	public static function hookInitSpecialPages( &$pages ) {
 		self::init();
 		global $wgSamlRequirement, $wgSamlMailAttr, $wgSamlConfirmMail;
 
-		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
-			unset($pages['ChangePassword']);
-			unset($pages['PasswordReset']);
-			if (isset($wgSamlMailAttr) && isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
-				unset($pages['ConfirmEmail']);
+		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
+			unset( $pages['ChangePassword'] );
+			unset( $pages['PasswordReset'] );
+			if ( isset( $wgSamlMailAttr ) && isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
+				unset( $pages['ConfirmEmail'] );
 			}
 		}
 
@@ -140,27 +142,27 @@ class SimpleSamlAuth {
 	 *
 	 * @param $template UserloginTemplate
 	 *
-	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookLoginForm(&$template) {
+	public static function hookLoginForm( &$template ) {
 		self::init();
 		global $wgSamlRequirement;
 
-		$url = self::$as->getLoginURL(Title::newMainPage()->getFullUrl());
+		$url = self::$as->getLoginURL( Title::newMainPage()->getFullUrl() );
 
-		if ($wgSamlRequirement >= SAML_LOGIN_ONLY) {
-			self::$as->requireAuth(array(
+		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY ) {
+			self::$as->requireAuth( array(
 				'ReturnTo' => Title::newMainPage()->getFullUrl()
-			));
-			$err = wfMessage('simplesamlauth-pagedisabled')->parse();
+			) );
+			$err = wfMessage( 'simplesamlauth-pagedisabled' )->parse();
 			return $err;
 		}
 
-		if (!self::$as->isAuthenticated()) {
+		if ( !self::$as->isAuthenticated() ) {
 			$template->set(
 				'extrafields',
-				'<a class="mw-ui-button mw-ui-constructive" href="'.htmlspecialchars($url).'">'.
-				wfMessage('simplesamlauth-login')->escaped().'</a>'
+				'<a class="mw-ui-button mw-ui-constructive" href="'.htmlspecialchars( $url ).'">'.
+				wfMessage( 'simplesamlauth-login' )->escaped().'</a>'
 			);
 		}
 
@@ -174,15 +176,15 @@ class SimpleSamlAuth {
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/UserLogout
 	 *
-	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookLogout() {
 		self::init();
 		global $wgSamlPostLogoutRedirect;
 
-		if (self::$as->isAuthenticated()) {
-			if (isset($wgSamlPostLogoutRedirect)) {
-				self::$as->logout($wgSamlPostLogoutRedirect);
+		if ( self::$as->isAuthenticated() ) {
+			if ( isset( $wgSamlPostLogoutRedirect ) ) {
+				self::$as->logout( $wgSamlPostLogoutRedirect );
 			} else {
 				self::$as->logout();
 			}
@@ -199,45 +201,46 @@ class SimpleSamlAuth {
 	 * @param $user User MediaWiki User object
 	 * @param $result boolean a user is logged in
 	 *
-	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookLoadSession($user, &$result) {
+	public static function hookLoadSession( $user, &$result ) {
 		self::init();
 		global $wgSamlRequirement, $wgSamlUsernameAttr;
 
-		if ($result) {
+		if ( $result ) {
 			// Another hook already logged in
-			if (self::$as->isAuthenticated()) {
+			if ( self::$as->isAuthenticated() ) {
 				self::$as->logout();
 			}
 			return true;
 		}
 
-		if ($wgSamlRequirement >= SAML_REQUIRED) {
+		if ( $wgSamlRequirement >= SAML_REQUIRED ) {
 			self::$as->requireAuth();
 		}
 
-		self::loadUser($user);
+		self::loadUser( $user );
 
 		/*
 		 * ->isLoggedIn is a confusing name:
 		 * it actually checks that user exists in DB
 		 */
-		if ($user instanceof User && $user->isLoggedIn()) {
+		if ( $user instanceof User && $user->isLoggedIn() ) {
 			global $wgBlockDisablesLogin;
-			if (!$wgBlockDisablesLogin || !$user->isBlocked()) {
+			if ( !$wgBlockDisablesLogin || !$user->isBlocked() ) {
 				$attr = self::$as->getAttributes();
-				if (isset($attr[$wgSamlUsernameAttr])
-				&&  $attr[$wgSamlUsernameAttr] 
-				&&  strtolower($user->getName()) === strtolower(reset($attr[$wgSamlUsernameAttr]))
+				if ( isset( $attr[$wgSamlUsernameAttr] )
+					&& $attr[$wgSamlUsernameAttr] 
+					&& strtolower( $user->getName()) ===
+						strtolower( reset( $attr[$wgSamlUsernameAttr] ) )
 				) {
-					wfDebug("User: logged in from SAML\n");
+					wfDebug( "User: logged in from SAML\n" );
 					$result = true;
 					return true;
 				}
 			}
 		}
-		if (self::$as->isAuthenticated()) {
+		if ( self::$as->isAuthenticated() ) {
 			self::$as->logout();
 		}
 		return true;
@@ -252,28 +255,34 @@ class SimpleSamlAuth {
 	 *
 	 * @param &$personal_urls array the array of URLs set up so far
 	 *
-	 * @return boolean|string TRUE on success, FALSE on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookPersonalUrls(array &$personal_urls) {
+	public static function hookPersonalUrls( array &$personal_urls ) {
 		global $wgSamlRequirement, $wgSamlPostLogoutRedirect, $wgRequest;
 
-		if ($wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated()) {
-			if (isset($personal_urls['logout'])) {
-				if (isset($wgSamlPostLogoutRedirect)) {
-					$personal_urls['logout']['href'] = self::$as->getLogoutURL($wgSamlPostLogoutRedirect);
-				} elseif ($wgSamlRequirement >= SAML_REQUIRED) {
+		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
+			if ( isset( $personal_urls['logout'] ) ) {
+				if ( isset( $wgSamlPostLogoutRedirect ) ) {
 					$personal_urls['logout']['href'] =
-						self::$as->getLogoutURL(self::$as->getLoginURL(Title::newMainPage()->getFullUrl()));
+						self::$as->getLogoutURL( $wgSamlPostLogoutRedirect );
+				} elseif ( $wgSamlRequirement >= SAML_REQUIRED ) {
+					$personal_urls['logout']['href'] =
+						self::$as->getLogoutURL(
+							self::$as->getLoginURL( Title::newMainPage()->getFullUrl() )
+						);
 				} else {
-					$personal_urls['logout']['href'] = self::$as->getLogoutURL($personal_urls['logout']['href']);
+					$personal_urls['logout']['href'] =
+						self::$as->getLogoutURL( $personal_urls['logout']['href'] );
 				}
 			}
-			if (!self::$as->isAuthenticated()) {
-				foreach(array('login', 'anonlogin') as $link) {
-					if (isset($personal_urls[$link])) {
-						if ($returnTo = $wgRequest->getVal('returnto')) {
-							$url = Title::newFromText($wgRequest->getVal('returnto'))->getFullUrl();
-							$personal_urls[$link]['href'] = self::$as->getLoginURL($url);
+			if ( !self::$as->isAuthenticated() ) {
+				foreach( array( 'login', 'anonlogin' ) as $link ) {
+					if ( isset( $personal_urls[$link] ) ) {
+						if ( $returnTo = $wgRequest->getVal( 'returnto' ) ) {
+							$url = Title::newFromText(
+								$wgRequest->getVal( 'returnto' )
+							)->getFullUrl();
+							$personal_urls[$link]['href'] = self::$as->getLoginURL( $url );
 						} else {
 							$personal_urls[$link]['href'] = self::$as->getLoginURL();
 						}
@@ -295,90 +304,101 @@ class SimpleSamlAuth {
 	 *
 	 * @return void errors may be triggered on return
 	 */
-	protected static function checkAttribute($friendlyName, $attributeName, $attr) {
-		if (isset($attr[$attributeName]) && $attr[$attributeName]) {
-			if (count($attr[$attributeName]) != 1) {
+	protected static function checkAttribute( $friendlyName, $attributeName, $attr ) {
+		if ( isset( $attr[$attributeName] ) && $attr[$attributeName] ) {
+			if ( count( $attr[$attributeName] ) != 1 ) {
 				trigger_error(
-					htmlspecialchars($friendlyName).
+					htmlspecialchars( $friendlyName ).
 					' attribute "'.
-					htmlspecialchars($attributeName).
+					htmlspecialchars( $attributeName ).
 					'" is multi-value, using only the first; '.
-					htmlspecialchars(reset($attr[$attributeName]))
-					, E_USER_WARNING);
+					htmlspecialchars( reset( $attr[$attributeName] ) )
+					, E_USER_WARNING );
 			}
 		}
 	}
 
 	/**
 	 * Return a user object that corresponds to the current SAML assertion.
-	 * If no SAML assertion is set, the function returns NULL.
+	 * If no SAML assertion is set, the function returns null.
 	 * If the user doesn't exist, and auto create has been turned on in the config,
 	 * the user is created.
 	 *
 	 * If realnameAttr and/or mailAttr and/or groupMap are set in the config,
-	 * these attributes are synchronised to the Mediawiki user.
+	 * these attributes are synchronised to the MediaWiki user.
 	 * This also happens if the user already exists.
 	 *
 	 * @param $user MediaWiki user that must correspond to the SAML assertion
 	 *
 	 * @return void $user is modified on return
 	 */
-	protected static function loadUser($user) {
-		if (!self::$as->isAuthenticated()) {
+	protected static function loadUser( $user ) {
+		if ( !self::$as->isAuthenticated() ) {
 			return;
 		}
-		global $wgSamlUsernameAttr, $wgSamlCreateUser, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
+		global $wgSamlUsernameAttr,
+			$wgSamlCreateUser,
+			$wgSamlRealnameAttr,
+			$wgSamlMailAttr,
+			$wgSamlConfirmMail;
+
 		$attr = self::$as->getAttributes();
 
-		if (!isset($attr[$wgSamlUsernameAttr]) || !$attr[$wgSamlUsernameAttr]) {
+		if ( !isset( $attr[$wgSamlUsernameAttr] ) || !$attr[$wgSamlUsernameAttr] ) {
 			wfDebug(
 				'Username attribute "'.
-				htmlspecialchars($wgSamlUsernameAttr).
-				'" has no value; refusing login'
+				htmlspecialchars( $wgSamlUsernameAttr ).
+				'" has no value; refusing login.'
 			);
 			return;
 		}
 
-		self::checkAttribute('Username', $wgSamlUsernameAttr, $attr);
-		self::checkAttribute('Real name', $wgSamlRealnameAttr, $attr);
-		self::checkAttribute('E-mail', $wgSamlMailAttr, $attr);
+		self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr );
+		self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr );
+		self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr );
 
 		/*
 		 * The temp user is created because ->load() doesn't override
 		 * the username, which can lead to incorrect capitalisation.
 		 */
-		$tempUser = User::newFromName(ucfirst(reset($attr[$wgSamlUsernameAttr])));
+		$tempUser = User::newFromName( ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
 		$tempUser->load();
 		$id = $tempUser->getId();
-		if (!$id) {
-			if ($wgSamlCreateUser) {
+		if ( !$id ) {
+			if ( $wgSamlCreateUser ) {
 				$tempUser->addToDatabase();
 				$id = $tempUser->getId();
 			} else {
-				wfDebug('User '.htmlspecialchars(reset($attr[$wgSamlUsernameAttr])).
-					' doesn\'t exist and "autoCreate" flag is FALSE.'
+				wfDebug( 'User '.htmlspecialchars( reset( $attr[$wgSamlUsernameAttr] ) ).
+					' doesn\'t exist and "autoCreate" flag is false.'
 				);
 			}
 		}
-		if ($id) {
-			$user->setId($id);
+		if ( $id ) {
+			$user->setId( $id );
 			$user->loadFromId();
 			$changed = false;
-			if (isset($wgSamlRealnameAttr) && isset($attr[$wgSamlRealnameAttr]) && $user->getRealName() !== reset($attr[$wgSamlRealnameAttr])) {
+			if ( isset( $wgSamlRealnameAttr )
+				&& isset( $attr[$wgSamlRealnameAttr] )
+				&& $user->getRealName() !== reset( $attr[$wgSamlRealnameAttr] )
+			) {
 				$changed = true;
-				$user->setRealName(reset($attr[$wgSamlRealnameAttr]));
+				$user->setRealName( reset( $attr[$wgSamlRealnameAttr] ) );
 			}
-			if (isset($wgSamlMailAttr) && isset($attr[$wgSamlMailAttr]) && $user->getEmail() !== reset($attr[$wgSamlMailAttr])) {
+			if ( isset( $wgSamlMailAttr )
+				&& isset( $attr[$wgSamlMailAttr] )
+				&& $user->getEmail() !== reset( $attr[$wgSamlMailAttr] )
+			) {
 				$changed = true;
-				$user->setEmail(reset($attr[$wgSamlMailAttr]));
-				if (isset($wgSamlConfirmMail) && $wgSamlConfirmMail) {
+				$user->setEmail( reset( $attr[$wgSamlMailAttr] ) );
+				if ( isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
 					$user->ConfirmEmail();
 				}
 			}
-			if ($changed) {
+			if ( $changed ) {
 				$user->saveSettings();
 			}
-			self::setGroups($user, $attr);
+			self::setGroups( $user, $attr );
 		}
 	}
 
@@ -390,19 +410,19 @@ class SimpleSamlAuth {
 	 *
 	 * @return void $user is modified on return
 	 */
-	protected static function setGroups($user, $attr) {
+	protected static function setGroups( $user, $attr ) {
 		global $wgSamlGroupMap;
 		
-		foreach($wgSamlGroupMap as $group => $rules) {
-			foreach($rules as $attrName => $needles) {
-				if (!isset($attr[$attrName])) {
+		foreach( $wgSamlGroupMap as $group => $rules ) {
+			foreach( $rules as $attrName => $needles ) {
+				if ( !isset( $attr[$attrName] ) ) {
 					continue;
 				}
-				foreach($needles as $needle) {
-					if (in_array($needle, $attr[$attrName])) {
-						$user->addGroup($group);
+				foreach( $needles as $needle ) {
+					if ( in_array( $needle, $attr[$attrName] ) ) {
+						$user->addGroup( $group );
 					} else {
-						$user->removeGroup($group);
+						$user->removeGroup( $group );
 					}
 				}
 			}

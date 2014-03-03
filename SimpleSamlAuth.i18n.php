@@ -60,8 +60,8 @@ $messages['fy'] = array(
 	'simplesamlauth-login' => 'Oanmelde mei SAML',
 );
 
-/** Estonian                                                                    
- * @author Kristian Kankainen                                                   
+/** Estonian
+ * @author Kristian Kankainen
  */
 $messages['et'] = array(
 	'simplesamlauth-desc' => 'Võimaldab SAML-iga autentimise kasutades [//simplesamlphp.org/ SimpleSAMLphp].',
