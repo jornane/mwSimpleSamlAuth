@@ -91,7 +91,7 @@ class SimpleSamlAuth {
 			if ( isset( $wgSamlRealnameAttr ) ) {
 				unset( $preferences['realname'] );
 			}
-			if ( isset( $wgSamlMailAttr ) && isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
+			if ( isset( $wgSamlMailAttr ) ) {
 				unset( $preferences['emailaddress'] );
 			}
 		}
@@ -119,8 +119,9 @@ class SimpleSamlAuth {
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $pages['ChangePassword'] );
 			unset( $pages['PasswordReset'] );
-			if ( isset( $wgSamlMailAttr ) && isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
+			if ( isset( $wgSamlMailAttr ) ) {
 				unset( $pages['ConfirmEmail'] );
+				unset( $pages['ChangeEmail'] );
 			}
 		}
 
