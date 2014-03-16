@@ -66,6 +66,7 @@ class SimpleSamlAuth {
 	public static function preload() {
 		self::init();
 		self::$as->isAuthenticated();
+		wfsetupSession();
 	}
 
 	/**
