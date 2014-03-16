@@ -66,7 +66,6 @@ class SimpleSamlAuth {
 	public static function preload() {
 		self::init();
 		self::$as->isAuthenticated();
-		wfSetupSession();
 	}
 
 	/**
@@ -407,6 +406,7 @@ class SimpleSamlAuth {
 				$user->saveSettings();
 			}
 			self::setGroups( $user, $attr );
+			wfSetupSession();
 		}
 	}
 
