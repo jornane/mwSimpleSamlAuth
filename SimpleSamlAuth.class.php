@@ -153,7 +153,8 @@ class SimpleSamlAuth {
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY ) {
 			self::$as->requireAuth( array(
-				'ReturnTo' => Title::newMainPage()->getFullUrl()
+				'ReturnTo' => Title::newMainPage()->getFullUrl(),
+				'KeepPost' => FALSE,
 			) );
 			$err = wfMessage( 'simplesamlauth-pagedisabled' )->parse();
 			return $err;
