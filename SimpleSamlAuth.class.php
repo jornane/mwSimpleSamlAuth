@@ -406,7 +406,11 @@ class SimpleSamlAuth {
 				$user->saveSettings();
 			}
 			self::setGroups( $user, $attr );
-			wfSetupSession();
+			if ( is_function( 'wfSetupSession' ) ) {
+				wfSetupSession();
+			} else {
+				$user->setupSession();
+			}
 		}
 	}
 
