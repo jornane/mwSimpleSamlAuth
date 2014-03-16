@@ -255,10 +255,11 @@ class SimpleSamlAuth {
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/PersonalUrls
 	 *
 	 * @param &$personal_urls array the array of URLs set up so far
+	 * @param Title $title the Title object of the current article
 	 *
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookPersonalUrls( array &$personal_urls ) {
+	public static function hookPersonalUrls( array &$personal_urls, Title $title ) {
 		global $wgSamlRequirement, $wgSamlPostLogoutRedirect, $wgRequest;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
@@ -284,6 +285,10 @@ class SimpleSamlAuth {
 								$wgRequest->getVal( 'returnto' )
 							)->getFullUrl();
 							$personal_urls[$link]['href'] = self::$as->getLoginURL( $url );
+						} elseif ( $title->isSpecial( 'Userlogout' ) ) {
+							$personal_urls[$link]['href'] = self::$as->getLoginURL(
+								Title::newMainPage()->getFullUrl()
+							);
 						} else {
 							$personal_urls[$link]['href'] = self::$as->getLoginURL();
 						}
