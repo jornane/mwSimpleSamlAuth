@@ -93,7 +93,7 @@ For SAML sessions, the standard preconfigured name in SimpleSamlPhp is `default-
 ### $wgSamlPostLogoutRedirect
 This is an URL where users are redirected when they log out from the MediaWiki installation.
 Generally, for a `SAML_REQUIRED` setup you want to set this to a landing page (intranet, for example).
-For any other setup, you may not want to set this to allow a user to continue browsing the Wiki anonymously when logging out.
+For any other setup, you may not want to set this, so users can continue browsing the Wiki anonymously after logging out.
 
 ### $wgSamlGroupMap
 This is a list of rules used to add users to MediaWiki groups based on their SAML attributes.
@@ -143,7 +143,7 @@ There is not really a difference between local accounts and remote accounts in M
 [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now.
 
 Upon SAML retrieval of a SAML assertion, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
-This newly created user will have no password, but will be able to reset its password if a valid e-mail address has been set.
+This newly created user will have no password, but will be able to reset their password if a valid e-mail address has been set.
 
 ### Other issue?
 Please report it on the project's [GitHub issues page](https://github.com/yorn/mwSimpleSamlAuth/issues).
