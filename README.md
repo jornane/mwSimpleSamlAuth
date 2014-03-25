@@ -7,7 +7,7 @@
 
 ## Requirements
 * [SimpleSamlPhp](//simplesamlphp.org) (tested on 1.11 and newer)
-* [MediaWiki](//mediawiki.org) (1.15 works, 1.16 or newer required for some features)
+* [MediaWiki](//mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
 
 ## Preparation
 * Install SimpleSamlPhp on the same domain as your MediaWiki installation.
