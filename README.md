@@ -113,22 +113,7 @@ $wgSamlGroupMap = array(
 An array as illustrated here will add users to the `sysop` MediaWiki group, if they have a SAML attribute named `groups` with at least a value `admin`.
 If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/yorn/sspmod_role).
 
-### SimpleSamlAuth::preload();
-Add this line if you need/want to run SimpleSamlPhp with `'store.type' => 'phpsession'`.
-This line should be added to **LocalSettings.php** *after* the variable assignments.
-
-The `preload()` function will start SimpleSamlPhp rightaway, allowing it to read session information before MediaWiki does.
-
 ## Known Issues
-### [State Information Lost](https://code.google.com/p/simplesamlphp/wiki/LostState)
-This problem is caused by MediaWiki and SimpleSamlPhp fighting over the PHP Session system, and SimpleSamlPhp losing.
-There are two ways to solve this problem:
-
-* In `config.php` in your SimpleSamlPhp installation, change `'store.type' => 'phpsession'` to another backend.
-Memcache is very easy to set up.
-* Add `SimpleSamlAuth::preload();` at the *end* of **LocalSettings.php**.
-This will give SimpleSamlPhp an advantage reading the session information.
-
 ### SAML users can edit their e-mail address
 Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences).
 Ubuntu 12.04 LTS comes with MediaWiki 1.15.

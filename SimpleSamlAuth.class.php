@@ -50,22 +50,9 @@ class SimpleSamlAuth {
 			DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
 		self::$as = new SimpleSAML_Auth_Simple( $wgSamlAuthSource );
+		self::$as->isAuthenticated();
 
 		self::$initialised = true;
-	}
-
-	/**
-	 * Bold hack to allow simpleSamlPhp to run with 'store.type' => 'phpsession'.
-	 * This method must be called from LocalSettings.php after all variables have been set.
-	 *
-	 * All it does is initialise, and call ->isAuthenticated() on the SAML Assertion Service,
-	 * thus claiming the PHP session before MediaWiki can.
-	 *
-	 * @return void
-	 */
-	public static function preload() {
-		self::init();
-		self::$as->isAuthenticated();
 	}
 
 	/**
