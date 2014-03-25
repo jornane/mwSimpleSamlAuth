@@ -35,8 +35,6 @@ require_once "$IP/extensions/SimpleSamlAuth/SimpleSamlAuth.php";
 $wgSamlRequirement = SAML_OPTIONAL;
 // Should users be created if they don't exist in the database yet?
 $wgSamlCreateUser = false;
-// Auto confirm e-mail for SAML users?
-// Use together with $wgEmailAuthentication
 
 // SAML attributes
 $wgSamlUsernameAttr = 'uid';
