@@ -70,8 +70,8 @@ class SimpleSamlAuth {
 
 	/**
 	 * Disables preferences which are redundant while using an external authentication source.
-	 * Password change is always disabled,
-	 * e-mail settings are enabled/disabled based on the configuration.
+	 * Password change and e-mail settings are always disabled,
+	 * Real name is only disabled if it is obtained from SAML.
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences
 	 *
@@ -83,7 +83,7 @@ class SimpleSamlAuth {
 	 */
 	public static function hookLimitPreferences( $user, &$preferences ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
+		global $wgSamlRequirement, $wgSamlRealnameAttr;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $preferences['password'] );
@@ -91,9 +91,7 @@ class SimpleSamlAuth {
 			if ( isset( $wgSamlRealnameAttr ) ) {
 				unset( $preferences['realname'] );
 			}
-			if ( isset( $wgSamlMailAttr ) ) {
-				unset( $preferences['emailaddress'] );
-			}
+			unset( $preferences['emailaddress'] );
 		}
 
 		return true;
@@ -114,15 +112,13 @@ class SimpleSamlAuth {
 	 */
 	public static function hookInitSpecialPages( &$pages ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlMailAttr, $wgSamlConfirmMail;
+		global $wgSamlRequirement, $wgSamlMailAttr;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $pages['ChangePassword'] );
 			unset( $pages['PasswordReset'] );
-			if ( isset( $wgSamlMailAttr ) ) {
-				unset( $pages['ConfirmEmail'] );
-				unset( $pages['ChangeEmail'] );
-			}
+			unset( $pages['ConfirmEmail'] );
+			unset( $pages['ChangeEmail'] );
 		}
 
 		return true;
@@ -346,8 +342,7 @@ class SimpleSamlAuth {
 		global $wgSamlUsernameAttr,
 			$wgSamlCreateUser,
 			$wgSamlRealnameAttr,
-			$wgSamlMailAttr,
-			$wgSamlConfirmMail;
+			$wgSamlMailAttr;
 
 		$attr = self::$as->getAttributes();
 
@@ -392,15 +387,10 @@ class SimpleSamlAuth {
 				$changed = true;
 				$user->setRealName( reset( $attr[$wgSamlRealnameAttr] ) );
 			}
-			if ( isset( $wgSamlMailAttr )
-				&& isset( $attr[$wgSamlMailAttr] )
-				&& $user->getEmail() !== reset( $attr[$wgSamlMailAttr] )
-			) {
+			if ( $user->getEmail() !== reset( $attr[$wgSamlMailAttr] ) ) {
 				$changed = true;
 				$user->setEmail( reset( $attr[$wgSamlMailAttr] ) );
-				if ( isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
-					$user->ConfirmEmail();
-				}
+				$user->ConfirmEmail();
 			}
 			if ( $changed ) {
 				$user->saveSettings();
