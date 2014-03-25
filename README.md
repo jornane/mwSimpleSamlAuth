@@ -142,7 +142,7 @@ Make sure that you have configured `$wgSamlMailAttr` correctly.
 There is not really a difference between local accounts and remote accounts in MediaWiki.
 [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now.
 
-Upon SAML retrieval of a SAML assertion, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
+If SimpleSamlPhp presents a valid session, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
 This newly created user will have no password, but will be able to reset their password if a valid e-mail address has been set.
 
 ### Other issue?
