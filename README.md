@@ -14,7 +14,8 @@
 * In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works.
 Also make sure that the attributes make sense.
 
-You may keep the attributes page open for later reference, for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
+You may keep the attributes page open for later reference,  
+for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
 
 If you encounter problems during the preparation, please [look here](http://simplesamlphp.org/support) for support.
 Only report bugs for SimpleSamlAuth when the preparation steps work for you.
@@ -63,20 +64,19 @@ Modify the variables starting with *$wgSaml* to configure the extension.
 Some important variables:
 
 ### $wgSamlRequirement
-This variable tells the extension how MediaWiki should behave.
+This variable tells the extension how MediaWiki should behave.  
 There are three options; `SAML_OPTIONAL` `SAML_LOGIN_ONLY` `SAML_REQUIRED`:
 
-|                                    | optional | login_only | required |
-|-----------------------------------:|:--------:|:----------:|:--------:|
-|           Allow login through SAML |    ✓     |     ✓      |    ✓     |
-| Update user's real name and e-mail |    ✓     |     ✓      |    ✓     |
-| Prevent creation of local accounts |          |     ✓      |    ✓     |
-|   Prevent login with local account |          |     ✓      |    ✓     |
-|         Prevent anonymous browsing |          |            |    ✓     |
-|       Redirect to login immediatly |          |            |    ✓     |
+|                                    | optional | loginonly | required |
+|-----------------------------------:|:--------:|:---------:|:--------:|
+|           Allow login through SAML |    ✓     |     ✓     |    ✓     |
+| Update user's real name and e-mail |    ✓     |     ✓     |    ✓     |
+| Prevent creation of local accounts |          |     ✓     |    ✓     |
+|   Prevent login with local account |          |     ✓     |    ✓     |
+|         Prevent anonymous browsing |          |           |    ✓     |
+|       Redirect to login immediatly |          |           |    ✓     |
 
-You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them.
-The only exception is that  `$wgSamlCreateUser = true` will have priority over `$wgGroupPermissions['*']['createaccount'] = false`.
+You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them. The only exception is that `$wgSamlCreateUser = true` will have priority over `$wgGroupPermissions['*']['createaccount'] = false`.
 
 ### $wgSamlConfirmMail
 This variable tells the extension that the e-mail address that is set from the SAML assertion must be marked as confirmed.
@@ -133,7 +133,7 @@ This will give SimpleSamlPhp an advantage reading the session information.
 Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences).
 Ubuntu 12.04 LTS comes with MediaWiki 1.15.
 [WikiMedia recommends against using the Ubuntu-provided version of MediaWiki.](http://www.mediawiki.org/wiki/Manual:Running_MediaWiki_on_Ubuntu)
-
+th
 ### E-mail addresses are not automatically confirmed
 SimpleSamlAuth will *only* confirm e-mail addresses that it has set itself.
 Make sure that you have configured `$wgSamlMailAttr` correctly.
