@@ -133,7 +133,7 @@ This will give SimpleSamlPhp an advantage reading the session information.
 Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences).
 Ubuntu 12.04 LTS comes with MediaWiki 1.15.
 [WikiMedia recommends against using the Ubuntu-provided version of MediaWiki.](http://www.mediawiki.org/wiki/Manual:Running_MediaWiki_on_Ubuntu)
-th
+
 ### E-mail addresses are not automatically confirmed
 SimpleSamlAuth will *only* confirm e-mail addresses that it has set itself.
 Make sure that you have configured `$wgSamlMailAttr` correctly.
