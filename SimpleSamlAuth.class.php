@@ -305,20 +305,31 @@ class SimpleSamlAuth {
 	 * @param $attributeName string name of the attribute in the SAML assertion
 	 * @param $attr string[][] SAML attributes from assertion
 	 *
-	 * @return void errors may be triggered on return
+	 * @return boolean whether login can continue
 	 */
-	protected static function checkAttribute( $friendlyName, $attributeName, $attr ) {
+	protected static function checkSingleAttribute( $friendlyName, $attributeName, $attr, $required ) {
+		if ( $required && ( !isset( $attr[$attributeName] ) || !$attr[$attributeName] ) ) {
+			wfDebug(
+				htmlspecialchars( $friendlyName ).
+				' SAML attribute "'.
+				htmlspecialchars( $attributeName ).
+				'" not configured; refusing login.'
+			);
+			return false;
+		}
 		if ( isset( $attr[$attributeName] ) && $attr[$attributeName] ) {
 			if ( count( $attr[$attributeName] ) != 1 ) {
-				trigger_error(
+				wfDebug(
 					htmlspecialchars( $friendlyName ).
-					' attribute "'.
+					' SAML attribute "'.
 					htmlspecialchars( $attributeName ).
-					'" is multi-value, using only the first; '.
+					'" is multi-value, using only the first value; '.
 					htmlspecialchars( reset( $attr[$attributeName] ) )
-					, E_USER_WARNING );
+					, true
+				);
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -346,18 +357,12 @@ class SimpleSamlAuth {
 
 		$attr = self::$as->getAttributes();
 
-		if ( !isset( $attr[$wgSamlUsernameAttr] ) || !$attr[$wgSamlUsernameAttr] ) {
-			wfDebug(
-				'Username attribute "'.
-				htmlspecialchars( $wgSamlUsernameAttr ).
-				'" has no value; refusing login.'
-			);
+		if ( !self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr, true )
+			|| !self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr, false );
+			|| !self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr, true )
+		) {
 			return;
 		}
-
-		self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr );
-		self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr );
-		self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr );
 
 		/*
 		 * The temp user is created because ->load() doesn't override
