@@ -7,14 +7,15 @@
 
 ## Requirements
 * [SimpleSamlPhp](//simplesamlphp.org) (tested on 1.11 and newer)
-* [MediaWiki](//mediawiki.org) (1.15 works, 1.16 or newer required for some features)
+* [MediaWiki](//mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
 
 ## Preparation
 * Install SimpleSamlPhp on the same domain as your MediaWiki installation.
 * In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works.
 Also make sure that the attributes make sense.
 
-You may keep the attributes page open for later reference, for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
+You may keep the attributes page open for later reference,  
+for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
 
 If you encounter problems during the preparation, please [look here](http://simplesamlphp.org/support) for support.
 Only report bugs for SimpleSamlAuth when the preparation steps work for you.
@@ -60,20 +61,19 @@ Modify the variables starting with *$wgSaml* to configure the extension.
 Some important variables:
 
 ### $wgSamlRequirement
-This variable tells the extension how MediaWiki should behave.
+This variable tells the extension how MediaWiki should behave.  
 There are three options; `SAML_OPTIONAL` `SAML_LOGIN_ONLY` `SAML_REQUIRED`:
 
-|                                    | optional | login_only | required |
-|-----------------------------------:|:--------:|:----------:|:--------:|
-|           Allow login through SAML |    ✓     |     ✓      |    ✓     |
-| Update user's real name and e-mail |    ✓     |     ✓      |    ✓     |
-| Prevent creation of local accounts |          |     ✓      |    ✓     |
-|   Prevent login with local account |          |     ✓      |    ✓     |
-|         Prevent anonymous browsing |          |            |    ✓     |
-|       Redirect to login immediatly |          |            |    ✓     |
+|                                    | optional | loginonly | required |
+|-----------------------------------:|:--------:|:---------:|:--------:|
+|           Allow login through SAML |    ✓     |     ✓     |    ✓     |
+| Update user's real name and e-mail |    ✓     |     ✓     |    ✓     |
+| Prevent creation of local accounts |          |     ✓     |    ✓     |
+|   Prevent login with local account |          |     ✓     |    ✓     |
+|         Prevent anonymous browsing |          |           |    ✓     |
+|       Redirect to login immediatly |          |           |    ✓     |
 
-You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them.
-The only exception is that  `$wgSamlCreateUser = true` will have priority over `$wgGroupPermissions['*']['createaccount'] = false`.
+You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them. The only exception is that `$wgSamlCreateUser = true` will have priority over `$wgGroupPermissions['*']['createaccount'] = false`.
 
 ### $wgSamlAuthSource
 This is the name of the AuthSource you configured in SimpleSamlPhp.
@@ -84,7 +84,7 @@ For SAML sessions, the standard preconfigured name in SimpleSamlPhp is `default-
 ### $wgSamlPostLogoutRedirect
 This is an URL where users are redirected when they log out from the MediaWiki installation.
 Generally, for a `SAML_REQUIRED` setup you want to set this to a landing page (intranet, for example).
-For any other setup, you may not want to set this to allow a user to continue browsing the Wiki anonymously when logging out.
+For any other setup, you may not want to set this, so users can continue browsing the Wiki anonymously after logging out.
 
 ### $wgSamlGroupMap
 This is a list of rules used to add users to MediaWiki groups based on their SAML attributes.
@@ -133,8 +133,8 @@ Make sure that you have configured `$wgSamlMailAttr` correctly.
 There is not really a difference between local accounts and remote accounts in MediaWiki.
 [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now.
 
-Upon SAML retrieval of a SAML assertion, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
-This newly created user will have no password, but will be able to reset its password if a valid e-mail address has been set.
+If SimpleSamlPhp presents a valid session, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
+This newly created user will have no password, but will be able to reset their password if a valid e-mail address has been set.
 
 ### Other issue?
 Please report it on the project's [GitHub issues page](https://github.com/yorn/mwSimpleSamlAuth/issues).

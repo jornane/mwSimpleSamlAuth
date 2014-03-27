@@ -159,8 +159,11 @@ class SimpleSamlAuth {
 		if ( !self::$as->isAuthenticated() ) {
 			$template->set(
 				'extrafields',
-				'<a class="mw-ui-button mw-ui-constructive" href="'.htmlspecialchars( $url ).'">'.
-				wfMessage( 'simplesamlauth-login' )->escaped().'</a>'
+				'<a class="mw-ui-button mw-ui-constructive" href="'
+				. htmlentities( $url )
+				. '">'
+				. wfMessage( 'simplesamlauth-login' )->escaped()
+				. '</a>'
 			);
 		}
 
@@ -208,6 +211,7 @@ class SimpleSamlAuth {
 		if ( $result ) {
 			// Another hook already logged in
 			if ( self::$as->isAuthenticated() ) {
+					wfDebug( "Both SAML and local user logged in; logging out SAML.\n" );
 				self::$as->logout();
 			}
 			return true;
@@ -232,13 +236,24 @@ class SimpleSamlAuth {
 					&& strtolower( $user->getName()) ===
 						strtolower( reset( $attr[$wgSamlUsernameAttr] ) )
 				) {
-					wfDebug( "User: logged in from SAML\n" );
 					$result = true;
 					return true;
+				} else {
+					wfDebug( 'Refusing login because MediaWiki username "'
+						. htmlentities($user->getName())
+						. '" does not match SAML username "'
+						. htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
+						. "\"\n"
+					);
 				}
+			} else {
+				wgDebug( 'Refusing login due to user "'.htmlentities($user->getName())."\" being blocked.\n" );
 			}
 		}
 		if ( self::$as->isAuthenticated() ) {
+			wfDebug( 'Unable to login despite a valid SSP session. '
+				. "Logging out from SSP in case this is a transient error.\n"
+				);
 			self::$as->logout();
 		}
 		return true;
@@ -364,11 +379,20 @@ class SimpleSamlAuth {
 			return;
 		}
 
+		$username = ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
+
+		if ( !User::isUsableName( $username ) ) {
+			wfDebug( 'Username "'
+				. htmlentities($username)
+				. "\" is not a valid MediaWiki username.\n"
+			);
+		}
+
 		/*
 		 * The temp user is created because ->load() doesn't override
 		 * the username, which can lead to incorrect capitalisation.
 		 */
-		$tempUser = User::newFromName( ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
+		$tempUser = User::newFromName( $username );
 		$tempUser->load();
 		$id = $tempUser->getId();
 		if ( !$id ) {
@@ -376,8 +400,9 @@ class SimpleSamlAuth {
 				$tempUser->addToDatabase();
 				$id = $tempUser->getId();
 			} else {
-				wfDebug( 'User '.htmlspecialchars( reset( $attr[$wgSamlUsernameAttr] ) ).
-					' doesn\'t exist and "autoCreate" flag is false.'
+				wfDebug( 'User "'
+					. htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
+					. "\" does not exist and \"\$wgSamlCreateUser\" flag is false.\n"
 				);
 			}
 		}
