@@ -319,10 +319,12 @@ class SimpleSamlAuth {
 	 * @param $friendlyName string human-readable name of the attribute
 	 * @param $attributeName string name of the attribute in the SAML assertion
 	 * @param $attr string[][] SAML attributes from assertion
+	 * @param $required boolean Whether the attribute is required;
+	 * 	function will return false if it is not available
 	 *
 	 * @return boolean whether login can continue
 	 */
-	protected static function checkSingleAttribute( $friendlyName, $attributeName, $attr, $required ) {
+	protected static function checkAttribute( $friendlyName, $attributeName, $attr, $required ) {
 		if ( $required && ( !isset( $attr[$attributeName] ) || !$attr[$attributeName] ) ) {
 			wfDebug(
 				htmlspecialchars( $friendlyName ).
@@ -373,7 +375,7 @@ class SimpleSamlAuth {
 		$attr = self::$as->getAttributes();
 
 		if ( !self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr, true )
-			|| !self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr, false );
+			|| !self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr, false )
 			|| !self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr, true )
 		) {
 			return;
