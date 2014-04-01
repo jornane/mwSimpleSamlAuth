@@ -50,7 +50,6 @@ class SimpleSamlAuth {
 			DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
 		self::$as = new SimpleSAML_Auth_Simple( $wgSamlAuthSource );
-		self::$as->isAuthenticated();
 
 		self::$initialised = true;
 	}
@@ -393,11 +392,6 @@ class SimpleSamlAuth {
 				$user->saveSettings();
 			}
 			self::setGroups( $user, $attr );
-			if ( function_exists( 'wfSetupSession' ) ) {
-				wfSetupSession();
-			} else {
-				$user->setupSession();
-			}
 		}
 	}
 
