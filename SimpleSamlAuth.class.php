@@ -193,7 +193,7 @@ class SimpleSamlAuth {
 	 */
 	public static function hookLoadSession( $user, &$result ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlUsernameAttr;
+		global $wgSamlRequirement, $wgSamlUsernameAttr, $wgBlockDisablesLogin;
 
 		if ( $result ) {
 			// Another hook already logged in
@@ -214,7 +214,6 @@ class SimpleSamlAuth {
 		 * it actually checks that user exists in DB
 		 */
 		if ( $user instanceof User && $user->isLoggedIn() ) {
-			global $wgBlockDisablesLogin;
 			if ( !$wgBlockDisablesLogin || !$user->isBlocked() ) {
 				$attr = self::$as->getAttributes();
 				if ( isset( $attr[$wgSamlUsernameAttr] )
