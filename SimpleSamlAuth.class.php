@@ -112,7 +112,7 @@ class SimpleSamlAuth {
 	 */
 	public static function hookInitSpecialPages( &$pages ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlMailAttr;
+		global $wgSamlRequirement;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $pages['ChangePassword'] );
