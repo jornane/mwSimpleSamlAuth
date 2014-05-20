@@ -221,6 +221,9 @@ class SimpleSamlAuth {
 					&& strtolower( $user->getName()) ===
 						strtolower( reset( $attr[$wgSamlUsernameAttr] ) )
 				) {
+					// Ensure we have a PHP session in place.
+					// This is required for compatibility with User::matchEditToken(string)
+					wfSetupSession();
 					wfDebug( "User: logged in from SAML\n" );
 					$result = true;
 					return true;
@@ -280,6 +283,33 @@ class SimpleSamlAuth {
 						}
 					}
 				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Use this to do something completely different, after the basic globals have been set up, but before ordinary actions take place.
+	 *
+	 * Takes control of the session before a stray SubmitAction calls wfSetupSession() for us.
+	 * This is a bug in MediaWiki which has not been fixed yet.
+	 * 
+	 * @link https://bugzilla.wikimedia.org/show_bug.cgi?id=65493
+	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/MediaWikiPerformAction
+	 *
+	 * @param object $output $wgOut
+	 * @param object $article $wgArticle
+	 * @param object $title $wgTitle
+	 * @param object $user $wgUser
+	 * @param object $request $wgRequest
+	 * @param object $wiki MediaWiki object, added in 1.13
+	 *
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 */
+	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
+		if (strtolower($request->getText('action')) == 'submit') {
+			if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+				$user->load();
 			}
 		}
 		return true;
