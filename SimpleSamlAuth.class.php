@@ -207,7 +207,11 @@ class SimpleSamlAuth {
 			self::$as->requireAuth();
 		}
 
-		self::loadUser( $user );
+		try {
+			self::loadUser( $user );
+		} catch (Exception $e) {
+			return $e->getMessage();
+		}
 
 		/*
 		 * ->isLoggedIn is a confusing name:
@@ -224,11 +228,10 @@ class SimpleSamlAuth {
 					// Ensure we have a PHP session in place.
 					// This is required for compatibility with User::matchEditToken(string)
 					wfSetupSession();
-					wfDebug( "User: logged in from SAML\n" );
 					$result = true;
 					return true;
 				} else {
-					wfDebug( 'Refusing login because MediaWiki username "'
+					return 'Refusing login because MediaWiki username "'
 						. htmlentities($user->getName())
 						. '" does not match SAML username "'
 						. htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
@@ -236,7 +239,7 @@ class SimpleSamlAuth {
 					);
 				}
 			} else {
-				wgDebug( 'Refusing login due to user "'.htmlentities($user->getName())."\" being blocked.\n" );
+				return 'Refusing login due to user "'.htmlentities($user->getName())."\" being blocked.\n";
 			}
 		}
 		if ( self::$as->isAuthenticated() ) {
@@ -342,23 +345,21 @@ class SimpleSamlAuth {
 	 */
 	protected static function checkAttribute( $friendlyName, $attributeName, $attr, $required ) {
 		if ( $required && ( !isset( $attr[$attributeName] ) || !$attr[$attributeName] ) ) {
-			wfDebug(
+			throw new Exception(
 				htmlspecialchars( $friendlyName ).
 				' SAML attribute "'.
 				htmlspecialchars( $attributeName ).
 				'" not configured; refusing login.'
 			);
-			return false;
 		}
 		if ( isset( $attr[$attributeName] ) && $attr[$attributeName] ) {
 			if ( count( $attr[$attributeName] ) != 1 ) {
-				wfDebug(
+				throw new Exception(
 					htmlspecialchars( $friendlyName ).
 					' SAML attribute "'.
 					htmlspecialchars( $attributeName ).
 					'" is multi-value, using only the first value; '.
 					htmlspecialchars( reset( $attr[$attributeName] ) )
-					, true
 				);
 			}
 		}
@@ -400,7 +401,7 @@ class SimpleSamlAuth {
 		$username = ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
 
 		if ( !User::isUsableName( $username ) ) {
-			wfDebug( 'Username "'
+			throw new Exception( 'Username "'
 				. htmlentities($username)
 				. "\" is not a valid MediaWiki username.\n"
 			);
@@ -418,7 +419,7 @@ class SimpleSamlAuth {
 				$tempUser->addToDatabase();
 				$id = $tempUser->getId();
 			} else {
-				wfDebug( 'User "'
+				throw new Exception( 'User "'
 					. htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
 					. "\" does not exist and \"\$wgSamlCreateUser\" flag is false.\n"
 				);
