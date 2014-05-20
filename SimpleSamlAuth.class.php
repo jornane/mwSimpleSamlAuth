@@ -55,20 +55,6 @@ class SimpleSamlAuth {
 	}
 
 	/**
-	 * Bold hack to allow simpleSamlPhp to run with 'store.type' => 'phpsession'.
-	 * This method must be called from LocalSettings.php after all variables have been set.
-	 *
-	 * All it does is initialise, and call ->isAuthenticated() on the SAML Assertion Service,
-	 * thus claiming the PHP session before MediaWiki can.
-	 *
-	 * @return void
-	 */
-	public static function preload() {
-		self::init();
-		self::$as->isAuthenticated();
-	}
-
-	/**
 	 * Disables preferences which are redundant while using an external authentication source.
 	 * Password change and e-mail settings are always disabled,
 	 * Real name is only disabled if it is obtained from SAML.
@@ -206,7 +192,7 @@ class SimpleSamlAuth {
 	 */
 	public static function hookLoadSession( $user, &$result ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlUsernameAttr;
+		global $wgSamlRequirement, $wgSamlUsernameAttr, $wgBlockDisablesLogin;
 
 		if ( $result ) {
 			// Another hook already logged in
@@ -228,7 +214,6 @@ class SimpleSamlAuth {
 		 * it actually checks that user exists in DB
 		 */
 		if ( $user instanceof User && $user->isLoggedIn() ) {
-			global $wgBlockDisablesLogin;
 			if ( !$wgBlockDisablesLogin || !$user->isBlocked() ) {
 				$attr = self::$as->getAttributes();
 				if ( isset( $attr[$wgSamlUsernameAttr] )
@@ -236,6 +221,10 @@ class SimpleSamlAuth {
 					&& strtolower( $user->getName()) ===
 						strtolower( reset( $attr[$wgSamlUsernameAttr] ) )
 				) {
+					// Ensure we have a PHP session in place.
+					// This is required for compatibility with User::matchEditToken(string)
+					wfSetupSession();
+					wfDebug( "User: logged in from SAML\n" );
 					$result = true;
 					return true;
 				} else {
@@ -306,6 +295,33 @@ class SimpleSamlAuth {
 						}
 					}
 				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Use this to do something completely different, after the basic globals have been set up, but before ordinary actions take place.
+	 *
+	 * Takes control of the session before a stray SubmitAction calls wfSetupSession() for us.
+	 * This is a bug in MediaWiki which has not been fixed yet.
+	 * 
+	 * @link https://bugzilla.wikimedia.org/show_bug.cgi?id=65493
+	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/MediaWikiPerformAction
+	 *
+	 * @param object $output $wgOut
+	 * @param object $article $wgArticle
+	 * @param object $title $wgTitle
+	 * @param object $user $wgUser
+	 * @param object $request $wgRequest
+	 * @param object $wiki MediaWiki object, added in 1.13
+	 *
+	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 */
+	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
+		if (strtolower($request->getText('action')) == 'submit') {
+			if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+				$user->load();
 			}
 		}
 		return true;

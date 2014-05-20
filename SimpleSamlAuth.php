@@ -36,12 +36,13 @@ $wgExtensionCredits['other'][] = array(
 	'descriptionmsg' => 'simplesamlauth-desc'
 );
 
-$wgHooks['UserLoadFromSession'][]  = 'SimpleSamlAuth::hookLoadSession';
-$wgHooks['GetPreferences'][]       = 'SimpleSamlAuth::hookLimitPreferences';
-$wgHooks['SpecialPage_initList'][] = 'SimpleSamlAuth::hookInitSpecialPages';
-$wgHooks['UserLoginForm'][]        = 'SimpleSamlAuth::hookLoginForm';
-$wgHooks['UserLogoutComplete'][]   = 'SimpleSamlAuth::hookLogout';
-$wgHooks['PersonalUrls'][]         = 'SimpleSamlAuth::hookPersonalUrls';
+$wgHooks['UserLoadFromSession'][]    = 'SimpleSamlAuth::hookLoadSession';
+$wgHooks['GetPreferences'][]         = 'SimpleSamlAuth::hookLimitPreferences';
+$wgHooks['SpecialPage_initList'][]   = 'SimpleSamlAuth::hookInitSpecialPages';
+$wgHooks['UserLoginForm'][]          = 'SimpleSamlAuth::hookLoginForm';
+$wgHooks['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookLogout';
+$wgHooks['PersonalUrls'][]           = 'SimpleSamlAuth::hookPersonalUrls';
+$wgHooks['MediaWikiPerformAction'][] = 'SimpleSamlAuth::hookMediaWikiPerformAction';
 
 define('SAML_OPTIONAL', 0);
 define('SAML_LOGIN_ONLY', 1);
