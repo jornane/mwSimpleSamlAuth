@@ -48,8 +48,6 @@ define('SAML_OPTIONAL', 0);
 define('SAML_LOGIN_ONLY', 1);
 define('SAML_REQUIRED', 2);
 
-$wgSessionName = ini_get('session.name');
-
 $wgSamlRequirement = SAML_OPTIONAL;
 $wgSamlCreateUser = false;
 $wgSamlConfirmMail = false;
