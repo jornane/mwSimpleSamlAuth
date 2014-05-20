@@ -56,8 +56,8 @@ class SimpleSamlAuth {
 
 	/**
 	 * Disables preferences which are redundant while using an external authentication source.
-	 * Password change is always disabled,
-	 * e-mail settings are enabled/disabled based on the configuration.
+	 * Password change and e-mail settings are always disabled,
+	 * Real name is only disabled if it is obtained from SAML.
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences
 	 *
@@ -69,7 +69,7 @@ class SimpleSamlAuth {
 	 */
 	public static function hookLimitPreferences( $user, &$preferences ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlRealnameAttr, $wgSamlMailAttr, $wgSamlConfirmMail;
+		global $wgSamlRequirement, $wgSamlRealnameAttr;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $preferences['password'] );
@@ -77,9 +77,7 @@ class SimpleSamlAuth {
 			if ( isset( $wgSamlRealnameAttr ) ) {
 				unset( $preferences['realname'] );
 			}
-			if ( isset( $wgSamlMailAttr ) ) {
-				unset( $preferences['emailaddress'] );
-			}
+			unset( $preferences['emailaddress'] );
 		}
 
 		return true;
@@ -100,15 +98,13 @@ class SimpleSamlAuth {
 	 */
 	public static function hookInitSpecialPages( &$pages ) {
 		self::init();
-		global $wgSamlRequirement, $wgSamlMailAttr, $wgSamlConfirmMail;
+		global $wgSamlRequirement;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $pages['ChangePassword'] );
 			unset( $pages['PasswordReset'] );
-			if ( isset( $wgSamlMailAttr ) ) {
-				unset( $pages['ConfirmEmail'] );
-				unset( $pages['ChangeEmail'] );
-			}
+			unset( $pages['ConfirmEmail'] );
+			unset( $pages['ChangeEmail'] );
 		}
 
 		return true;
@@ -339,21 +335,34 @@ class SimpleSamlAuth {
 	 * @param $friendlyName string human-readable name of the attribute
 	 * @param $attributeName string name of the attribute in the SAML assertion
 	 * @param $attr string[][] SAML attributes from assertion
+	 * @param $required boolean Whether the attribute is required;
+	 * 	function will return false if it is not available
 	 *
-	 * @return void errors may be triggered on return
+	 * @return boolean whether login can continue
 	 */
-	protected static function checkAttribute( $friendlyName, $attributeName, $attr ) {
+	protected static function checkAttribute( $friendlyName, $attributeName, $attr, $required ) {
+		if ( $required && ( !isset( $attr[$attributeName] ) || !$attr[$attributeName] ) ) {
+			wfDebug(
+				htmlspecialchars( $friendlyName ).
+				' SAML attribute "'.
+				htmlspecialchars( $attributeName ).
+				'" not configured; refusing login.'
+			);
+			return false;
+		}
 		if ( isset( $attr[$attributeName] ) && $attr[$attributeName] ) {
 			if ( count( $attr[$attributeName] ) != 1 ) {
-				trigger_error(
-					htmlentities( $friendlyName ).
-					' attribute "'.
-					htmlentities( $attributeName ).
-					'" is multi-value, using only the first; '.
-					htmlentities( reset( $attr[$attributeName] ) )
-					, E_USER_WARNING );
+				wfDebug(
+					htmlspecialchars( $friendlyName ).
+					' SAML attribute "'.
+					htmlspecialchars( $attributeName ).
+					'" is multi-value, using only the first value; '.
+					htmlspecialchars( reset( $attr[$attributeName] ) )
+					, true
+				);
 			}
 		}
+		return true;
 	}
 
 	/**
@@ -377,23 +386,16 @@ class SimpleSamlAuth {
 		global $wgSamlUsernameAttr,
 			$wgSamlCreateUser,
 			$wgSamlRealnameAttr,
-			$wgSamlMailAttr,
-			$wgSamlConfirmMail;
+			$wgSamlMailAttr;
 
 		$attr = self::$as->getAttributes();
 
-		if ( !isset( $attr[$wgSamlUsernameAttr] ) || !$attr[$wgSamlUsernameAttr] ) {
-			wfDebug(
-				'Username attribute "'
-				. htmlentities( $wgSamlUsernameAttr )
-				. '" has no value; refusing login.'
-			);
+		if ( !self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr, true )
+			|| !self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr, false )
+			|| !self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr, true )
+		) {
 			return;
 		}
-
-		self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr );
-		self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr );
-		self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr );
 
 		$username = ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
 
@@ -433,15 +435,10 @@ class SimpleSamlAuth {
 				$changed = true;
 				$user->setRealName( reset( $attr[$wgSamlRealnameAttr] ) );
 			}
-			if ( isset( $wgSamlMailAttr )
-				&& isset( $attr[$wgSamlMailAttr] )
-				&& $user->getEmail() !== reset( $attr[$wgSamlMailAttr] )
-			) {
+			if ( $user->getEmail() !== reset( $attr[$wgSamlMailAttr] ) ) {
 				$changed = true;
 				$user->setEmail( reset( $attr[$wgSamlMailAttr] ) );
-				if ( isset( $wgSamlConfirmMail ) && $wgSamlConfirmMail ) {
-					$user->ConfirmEmail();
-				}
+				$user->ConfirmEmail();
 			}
 			if ( $changed ) {
 				$user->saveSettings();

@@ -36,9 +36,6 @@ require_once "$IP/extensions/SimpleSamlAuth/SimpleSamlAuth.php";
 $wgSamlRequirement = SAML_OPTIONAL;
 // Should users be created if they don't exist in the database yet?
 $wgSamlCreateUser = false;
-// Auto confirm e-mail for SAML users?
-// Use together with $wgEmailAuthentication
-$wgSamlConfirmMail = false;
 
 // SAML attributes
 $wgSamlUsernameAttr = 'uid';
@@ -77,12 +74,6 @@ There are three options; `SAML_OPTIONAL` `SAML_LOGIN_ONLY` `SAML_REQUIRED`:
 |       Redirect to login immediatly |          |           |    ✓     |
 
 You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them. The only exception is that `$wgSamlCreateUser = true` will have priority over `$wgGroupPermissions['*']['createaccount'] = false`.
-
-### $wgSamlConfirmMail
-This variable tells the extension that the e-mail address that is set from the SAML assertion must be marked as confirmed.
-Normally, e-mail confirmation happens by sending an e-mail to the user which contains a link that must be clicked to proof the user really owns the address, but this option allows users logging in through SAML to skip this step, while local users still have to confirm by clicking a link in an e-mail.
-
-This option doesn't make much sense outside `SAML_OPTIONAL`, because when every user must log in through SAML, it's easier to just set `$wgEmailAuthentication = false`.
 
 ### $wgSamlAuthSource
 This is the name of the AuthSource you configured in SimpleSamlPhp.
