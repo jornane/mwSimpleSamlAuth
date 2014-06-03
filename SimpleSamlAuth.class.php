@@ -30,17 +30,23 @@ class SimpleSamlAuth {
 	/** Whether $as is initialised */
 	private static $initialised;
 
+	/** Semaphore that will prevent any actions when set to false */
+	private static $armed = true;
+
 	/**
 	 * Construct a new object and register it in $wgHooks.
 	 * See README.md for possible values in $config.
 	 *
 	 * @param $config mixed[] Configuration settings for the SimpleSamlAuth extension.
 	 *
-	 * @return void
+	 * @return boolean 
 	 */
 	private static function init() {
+		if ( !self::$armed ) {
+			return false;
+		}
 		if ( self::$initialised ) {
-			return;
+			return true;
 		}
 
 		global $wgSamlSspRoot, $wgSamlAuthSource;
@@ -51,7 +57,16 @@ class SimpleSamlAuth {
 
 		self::$as = new SimpleSAML_Auth_Simple( $wgSamlAuthSource );
 
-		self::$initialised = true;
+		self::$initialised = is_object( self::$as );
+
+		return self::$initialised;
+	}
+
+	/**
+	 * Will prevent any further action from this extension in the current request.
+	 */
+	private static function disarm() {
+		self::$armed = false;
 	}
 
 	/**
@@ -68,7 +83,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookLimitPreferences( $user, &$preferences ) {
-		self::init();
+		if ( !self::init() ) return true;
 		global $wgSamlRequirement, $wgSamlRealnameAttr;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
@@ -97,7 +112,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookInitSpecialPages( &$pages ) {
-		self::init();
+		if ( !self::init() ) return true;
 		global $wgSamlRequirement;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
@@ -128,7 +143,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookLoginForm( &$template ) {
-		self::init();
+		if ( !self::init() ) return true;
 		global $wgSamlRequirement;
 
 		$url = self::$as->getLoginURL( Title::newMainPage()->getFullUrl() );
@@ -166,7 +181,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookLogout() {
-		self::init();
+		if ( !self::init() ) return true;
 		global $wgSamlPostLogoutRedirect;
 
 		if ( self::$as->isAuthenticated() ) {
@@ -191,7 +206,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookLoadSession( $user, &$result ) {
-		self::init();
+		if ( !self::init() ) return true;
 		global $wgSamlRequirement, $wgSamlUsernameAttr, $wgBlockDisablesLogin;
 
 		if ( $result ) {
@@ -261,6 +276,7 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookPersonalUrls( array &$personal_urls, Title $title ) {
+		if ( !self::init() ) return true;
 		global $wgSamlRequirement, $wgSamlPostLogoutRedirect, $wgRequest;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
