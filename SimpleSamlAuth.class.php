@@ -386,7 +386,8 @@ class SimpleSamlAuth {
 		global $wgSamlUsernameAttr,
 			$wgSamlCreateUser,
 			$wgSamlRealnameAttr,
-			$wgSamlMailAttr;
+			$wgSamlMailAttr,
+			$wgContLang;
 
 		$attr = self::$as->getAttributes();
 
@@ -397,7 +398,7 @@ class SimpleSamlAuth {
 			return;
 		}
 
-		$username = ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
+		$username = $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
 
 		if ( !User::isUsableName( $username ) ) {
 			wfDebug( 'Username "'
