@@ -82,7 +82,7 @@ class SimpleSamlAuth {
 	 *
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookLimitPreferences( $user, &$preferences ) {
+	public static function hookGetPreferences( $user, &$preferences ) {
 		if ( !self::init() ) return true;
 		global $wgSamlRequirement, $wgSamlRealnameAttr;
 
@@ -111,7 +111,7 @@ class SimpleSamlAuth {
 	 *
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookInitSpecialPages( &$pages ) {
+	public static function hookSpecialPage_initList( &$pages ) {
 		if ( !self::init() ) return true;
 		global $wgSamlRequirement;
 
@@ -180,7 +180,7 @@ class SimpleSamlAuth {
 	 *
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
-	public static function hookLogout() {
+	public static function hookUserLogout() {
 		if ( !self::init() ) return true;
 		global $wgSamlPostLogoutRedirect;
 
