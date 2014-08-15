@@ -37,10 +37,10 @@ $wgExtensionCredits['other'][] = array(
 );
 
 $wgHooks['UserLoadFromSession'][]    = 'SimpleSamlAuth::hookLoadSession';
-$wgHooks['GetPreferences'][]         = 'SimpleSamlAuth::hookLimitPreferences';
-$wgHooks['SpecialPage_initList'][]   = 'SimpleSamlAuth::hookInitSpecialPages';
+$wgHooks['GetPreferences'][]         = 'SimpleSamlAuth::hookGetPreferences';
+$wgHooks['SpecialPage_initList'][]   = 'SimpleSamlAuth::hookSpecialPage_initList';
 $wgHooks['UserLoginForm'][]          = 'SimpleSamlAuth::hookLoginForm';
-$wgHooks['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookLogout';
+$wgHooks['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookUserLogout';
 $wgHooks['PersonalUrls'][]           = 'SimpleSamlAuth::hookPersonalUrls';
 $wgHooks['MediaWikiPerformAction'][] = 'SimpleSamlAuth::hookMediaWikiPerformAction';
 

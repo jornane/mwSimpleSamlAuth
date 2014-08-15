@@ -18,7 +18,7 @@ You may keep the attributes page open for later reference,
 for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
 
 If you encounter problems during the preparation, please [look here](http://simplesamlphp.org/support) for support.
-Only report bugs for SimpleSamlAuth when the preparation steps work for you.
+*Only* report bugs for SimpleSamlAuth if the **preparation steps** work for you.
 
 ## Installation
 * Clone this repository into your MediaWikis *extensions* directory, and call it **SimpleSamlAuth**.
