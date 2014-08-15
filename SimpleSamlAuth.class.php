@@ -39,7 +39,7 @@ class SimpleSamlAuth {
 	 *
 	 * @param $config mixed[] Configuration settings for the SimpleSamlAuth extension.
 	 *
-	 * @return boolean 
+	 * @return boolean
 	 */
 	private static function init() {
 		global $wgSamlSspRoot;
@@ -81,7 +81,7 @@ class SimpleSamlAuth {
 	 *                   ignored by this method because it checks the SAML assertion instead.
 	 * @param &$preferences Preferences description array, to be fed to an HTMLForm object.
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookGetPreferences( $user, &$preferences ) {
 		if ( !self::init() ) return true;
@@ -112,7 +112,7 @@ class SimpleSamlAuth {
 	 *
 	 * @param $pages string[] List of special pages in MediaWiki
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookSpecialPage_initList( &$pages ) {
 		if ( !self::init() ) return true;
@@ -143,7 +143,7 @@ class SimpleSamlAuth {
 	 *
 	 * @param $template UserloginTemplate
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookLoginForm( &$template ) {
 		if ( !self::init() ) return true;
@@ -181,7 +181,7 @@ class SimpleSamlAuth {
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/UserLogout
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookUserLogout() {
 		if ( !self::init() ) return true;
@@ -211,7 +211,7 @@ class SimpleSamlAuth {
 	 * @param $user User MediaWiki User object
 	 * @param $result boolean a user is logged in
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookLoadSession( $user, &$result ) {
 		if ( !self::init() ) return true;
@@ -230,20 +230,20 @@ class SimpleSamlAuth {
 			self::$as->requireAuth();
 		}
 
-		if ( self::$as->isAuthenticated() ) { 
+		if ( self::$as->isAuthenticated() ) {
 			$attr = self::$as->getAttributes();
 			if ( !User::isUsableName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) ) ) {
 				return 'Illegal username: ' . reset( $attr[$wgSamlUsernameAttr] );
-			} 
+			}
 			self::loadUser( $user, $attr );
 			if ( $wgBlockDisablesLogin && $user->isBlocked() ) {
 				$block = $this->getUser()->getBlock();
 				throw new UserBlockedError( $block );
-			} else { 
+			} else {
 				$result = true;
 				return true;
-			} 
-		} 
+			}
+		}
 		return true;
 	}
 
@@ -257,7 +257,7 @@ class SimpleSamlAuth {
 	 * @param &$personal_urls array the array of URLs set up so far
 	 * @param Title $title the Title object of the current article
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookPersonalUrls( array &$personal_urls, Title $title ) {
 		if ( !self::init() ) return true;
@@ -307,7 +307,7 @@ class SimpleSamlAuth {
 	 *
 	 * Takes control of the session before a stray SubmitAction calls wfSetupSession() for us.
 	 * This is a bug in MediaWiki which has not been fixed yet.
-	 * 
+	 *
 	 * @link https://bugzilla.wikimedia.org/show_bug.cgi?id=65493
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/MediaWikiPerformAction
 	 *
@@ -318,7 +318,7 @@ class SimpleSamlAuth {
 	 * @param object $request $wgRequest
 	 * @param object $wiki MediaWiki object, added in 1.13
 	 *
-	 * @return boolean|string true on success, false on silent error, string on verbose error 
+	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
 		if ( !self::init() ) return true;
