@@ -220,10 +220,7 @@ class SimpleSamlAuth {
 
 		if ( $result ) {
 			// Another hook already logged in
-			if ( self::$as->isAuthenticated() ) {
-					wfDebug( "Both SAML and local user logged in; logging out SAML.\n" );
-				self::$as->logout();
-			}
+			self::disarm();
 			return true;
 		}
 
