@@ -226,10 +226,6 @@ class SimpleSamlAuth {
 			return true;
 		}
 
-		if ( $wgSamlRequirement >= SAML_REQUIRED ) {
-			self::$as->requireAuth();
-		}
-
 		if ( self::$as->isAuthenticated() ) {
 			$attr = self::$as->getAttributes();
 			if ( !User::isUsableName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) ) ) {
@@ -328,6 +324,11 @@ class SimpleSamlAuth {
 		if ( in_array( $title, $wgWhitelistRead ) ) {
 			$wgSamlRequirement = min( $wgSamlRequirement, SAML_LOGIN_ONLY );
 		}
+
+		if ( $wgSamlRequirement >= SAML_REQUIRED ) {
+			self::$as->requireAuth();
+		}
+
 		$user->load();
 		return true;
 	}
