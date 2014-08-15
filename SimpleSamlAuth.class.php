@@ -343,11 +343,8 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error 
 	 */
 	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
-		if (strtolower($request->getText('action')) == 'submit') {
-			if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-				$user->load();
-			}
-		}
+		if ( !self::init() ) return true;
+		$user->load();
 		return true;
 	}
 
