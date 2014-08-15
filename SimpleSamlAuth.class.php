@@ -42,14 +42,15 @@ class SimpleSamlAuth {
 	 * @return boolean 
 	 */
 	private static function init() {
+		global $wgSamlSspRoot;
+		global $wgSamlAuthSource;
+
 		if ( !self::$armed ) {
 			return false;
 		}
 		if ( self::$initialised ) {
 			return true;
 		}
-
-		global $wgSamlSspRoot, $wgSamlAuthSource;
 
 		// Load the simpleSamlPhp service
 		require_once rtrim( $wgSamlSspRoot, DIRECTORY_SEPARATOR ) .
@@ -84,7 +85,8 @@ class SimpleSamlAuth {
 	 */
 	public static function hookGetPreferences( $user, &$preferences ) {
 		if ( !self::init() ) return true;
-		global $wgSamlRequirement, $wgSamlRealnameAttr;
+		global $wgSamlRequirement;
+		global $wgSamlRealnameAttr;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			unset( $preferences['password'] );
@@ -207,7 +209,9 @@ class SimpleSamlAuth {
 	 */
 	public static function hookLoadSession( $user, &$result ) {
 		if ( !self::init() ) return true;
-		global $wgSamlRequirement, $wgSamlUsernameAttr, $wgBlockDisablesLogin;
+		global $wgSamlRequirement;
+		global $wgSamlUsernameAttr;
+		global $wgBlockDisablesLogin;
 
 		if ( $result ) {
 			// Another hook already logged in
@@ -277,7 +281,9 @@ class SimpleSamlAuth {
 	 */
 	public static function hookPersonalUrls( array &$personal_urls, Title $title ) {
 		if ( !self::init() ) return true;
-		global $wgSamlRequirement, $wgSamlPostLogoutRedirect, $wgRequest;
+		global $wgSamlRequirement
+		global $wgSamlPostLogoutRedirect;
+		global $wgRequest;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
 			if ( isset( $personal_urls['logout'] ) ) {
@@ -399,11 +405,11 @@ class SimpleSamlAuth {
 		if ( !self::$as->isAuthenticated() ) {
 			return;
 		}
-		global $wgSamlUsernameAttr,
-			$wgSamlCreateUser,
-			$wgSamlRealnameAttr,
-			$wgSamlMailAttr,
-			$wgContLang;
+		global $wgSamlUsernameAttr;
+		global $wgSamlCreateUser;
+		global $wgSamlRealnameAttr;
+		global $wgSamlMailAttr;
+		global $wgContLang;
 
 		$attr = self::$as->getAttributes();
 
