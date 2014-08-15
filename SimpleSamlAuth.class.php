@@ -305,10 +305,10 @@ class SimpleSamlAuth {
 			if ( !self::$as->isAuthenticated() ) {
 				foreach( array( 'login', 'anonlogin' ) as $link ) {
 					if ( isset( $personal_urls[$link] ) ) {
-						if ( $returnTo = $wgRequest->getVal( 'returnto' ) ) {
-							$url = Title::newFromText(
-								$wgRequest->getVal( 'returnto' )
-							)->getFullUrl();
+						if ( $returnTo = $wgRequest->getVal( 'returnto' )
+							&& $page = Title::newFromText( $returnTo )
+						) {
+							$url = $page->getFullUrl();
 							$personal_urls[$link]['href'] = self::$as->getLoginURL( $url );
 						} elseif ( $title->isSpecial( 'Userlogout' ) ) {
 							$personal_urls[$link]['href'] = self::$as->getLoginURL(
