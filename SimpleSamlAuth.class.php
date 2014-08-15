@@ -99,6 +99,7 @@ class SimpleSamlAuth {
 
 		return true;
 	}
+
 	/**
 	 * Disables special pages which are redundant while using an external authentication source.
 	 * Password change is always disabled,
@@ -217,6 +218,7 @@ class SimpleSamlAuth {
 		global $wgSamlRequirement;
 		global $wgSamlUsernameAttr;
 		global $wgBlockDisablesLogin;
+		global $wgContLang;
 
 		if ( $result ) {
 			// Another hook already logged in
@@ -228,44 +230,20 @@ class SimpleSamlAuth {
 			self::$as->requireAuth();
 		}
 
-		self::loadUser( $user );
-
-		/*
-		 * ->isLoggedIn is a confusing name:
-		 * it actually checks that user exists in DB
-		 */
-		if ( $user instanceof User && $user->isLoggedIn() ) {
-			if ( !$wgBlockDisablesLogin || !$user->isBlocked() ) {
-				$attr = self::$as->getAttributes();
-				if ( isset( $attr[$wgSamlUsernameAttr] )
-					&& $attr[$wgSamlUsernameAttr] 
-					&& strtolower( $user->getName()) ===
-						strtolower( reset( $attr[$wgSamlUsernameAttr] ) )
-				) {
-					// Ensure we have a PHP session in place.
-					// This is required for compatibility with User::matchEditToken(string)
-					wfSetupSession();
-					wfDebug( "User: logged in from SAML\n" );
-					$result = true;
-					return true;
-				} else {
-					wfDebug( 'Refusing login because MediaWiki username "'
-						. htmlentities($user->getName())
-						. '" does not match SAML username "'
-						. htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
-						. "\"\n"
-					);
-				}
-			} else {
-				wgDebug( 'Refusing login due to user "'.htmlentities($user->getName())."\" being blocked.\n" );
-			}
-		}
-		if ( self::$as->isAuthenticated() ) {
-			wfDebug( 'Unable to login despite a valid SSP session. '
-				. "Logging out from SSP in case this is a transient error.\n"
-				);
-			self::$as->logout();
-		}
+		if ( self::$as->isAuthenticated() ) { 
+			$attr = self::$as->getAttributes();
+			if ( !User::isUsableName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) ) ) {
+				return 'Illegal username: ' . reset( $attr[$wgSamlUsernameAttr] );
+			} 
+			self::loadUser( $user, $attr );
+			if ( $wgBlockDisablesLogin && $user->isBlocked() ) {
+				$block = $this->getUser()->getBlock();
+				throw new UserBlockedError( $block );
+			} else { 
+				$result = true;
+				return true;
+			} 
+		} 
 		return true;
 	}
 
@@ -349,44 +327,6 @@ class SimpleSamlAuth {
 	}
 
 	/**
-	 * Trigger an error if an attribute contains more than one value.
-	 * This function should only be executed on attributes that are used for
-	 * username, real name and e-mail.
-	 *
-	 * @param $friendlyName string human-readable name of the attribute
-	 * @param $attributeName string name of the attribute in the SAML assertion
-	 * @param $attr string[][] SAML attributes from assertion
-	 * @param $required boolean Whether the attribute is required;
-	 * 	function will return false if it is not available
-	 *
-	 * @return boolean whether login can continue
-	 */
-	protected static function checkAttribute( $friendlyName, $attributeName, $attr, $required ) {
-		if ( $required && ( !isset( $attr[$attributeName] ) || !$attr[$attributeName] ) ) {
-			wfDebug(
-				htmlspecialchars( $friendlyName ).
-				' SAML attribute "'.
-				htmlspecialchars( $attributeName ).
-				'" not configured; refusing login.'
-			);
-			return false;
-		}
-		if ( isset( $attr[$attributeName] ) && $attr[$attributeName] ) {
-			if ( count( $attr[$attributeName] ) != 1 ) {
-				wfDebug(
-					htmlspecialchars( $friendlyName ).
-					' SAML attribute "'.
-					htmlspecialchars( $attributeName ).
-					'" is multi-value, using only the first value; '.
-					htmlspecialchars( reset( $attr[$attributeName] ) )
-					, true
-				);
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Return a user object that corresponds to the current SAML assertion.
 	 * If no SAML assertion is set, the function returns null.
 	 * If the user doesn't exist, and auto create has been turned on in the config,
@@ -396,90 +336,85 @@ class SimpleSamlAuth {
 	 * these attributes are synchronised to the MediaWiki user.
 	 * This also happens if the user already exists.
 	 *
-	 * @param $user MediaWiki user that must correspond to the SAML assertion
+	 * @param $user MediaWiki user that will be made to correspond to the SAML assertion
+	 * @param $attr string[][] SAML attributes
 	 *
-	 * @return void $user is modified on return
+	 * @return void $user is modified upon return
 	 */
-	protected static function loadUser( $user ) {
-		if ( !self::$as->isAuthenticated() ) {
-			return;
-		}
-		global $wgSamlUsernameAttr;
+	protected static function loadUser( User $user, $attr ) {
 		global $wgSamlCreateUser;
+		global $wgSamlUsernameAttr;
+		global $wgContLang;
+
+		$username = $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
+
+		$id = User::idFromName( $username );
+		if ( $id || $wgSamlCreateUser ) {
+			if ( $id ) {
+				$user->setId( $id );
+				$user->loadFromId();
+			} else {
+				$user->setName( $username );
+			}
+			self::updateUser( $user, $attr );
+			self::setGroups( $user );
+		} else {
+			return 'User "'
+			     . htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
+			     . "\" does not exist and \"\$wgSamlCreateUser\" flag is false.\n"
+			     ;
+		}
+	}
+
+	/**
+	 * Set users' fields from SAML attributes.
+	 * If the user does not exist in the MediaWiki database,
+	 * it is created. wgSamlCreateUser is not respected.
+	 *
+	 * @param User $user the user
+	 * @param string[][] $attr SAML attributes
+	 */
+	protected static function updateUser( User $user, $attr ) {
 		global $wgSamlRealnameAttr;
 		global $wgSamlMailAttr;
 		global $wgContLang;
 
-		$attr = self::$as->getAttributes();
-
-		if ( !self::checkAttribute( 'Username', $wgSamlUsernameAttr, $attr, true )
-			|| !self::checkAttribute( 'Real name', $wgSamlRealnameAttr, $attr, false )
-			|| !self::checkAttribute( 'E-mail', $wgSamlMailAttr, $attr, true )
+		$changed = false;
+		if ( isset( $wgSamlRealnameAttr )
+			&& isset( $attr[$wgSamlRealnameAttr] )
+			&& $attr[$wgSamlRealnameAttr]
+			&& $user->getRealName() !== reset( $attr[$wgSamlRealnameAttr] )
 		) {
-			return;
+			$changed = true;
+			$user->setRealName( reset( $attr[$wgSamlRealnameAttr] ) );
 		}
-
-		$username = $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) );
-
-		if ( !User::isUsableName( $username ) ) {
-			wfDebug( 'Username "'
-				. htmlentities($username)
-				. "\" is not a valid MediaWiki username.\n"
-			);
+		if ( $attr[$wgSamlMailAttr]
+			&& $user->getEmail() !== reset( $attr[$wgSamlMailAttr] )
+		) {
+			$changed = true;
+			$user->setEmail( reset( $attr[$wgSamlMailAttr] ) );
+			$user->ConfirmEmail();
 		}
-
-		/*
-		 * The temp user is created because ->load() doesn't override
-		 * the username, which can lead to incorrect capitalisation.
-		 */
-		$tempUser = User::newFromName( $username );
-		$tempUser->load();
-		$id = $tempUser->getId();
-		if ( !$id ) {
-			if ( $wgSamlCreateUser ) {
-				$tempUser->addToDatabase();
-				$id = $tempUser->getId();
-			} else {
-				wfDebug( 'User "'
-					. htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
-					. "\" does not exist and \"\$wgSamlCreateUser\" flag is false.\n"
-				);
-			}
-		}
-		if ( $id ) {
-			$user->setId( $id );
-			$user->loadFromId();
-			$changed = false;
-			if ( isset( $wgSamlRealnameAttr )
-				&& isset( $attr[$wgSamlRealnameAttr] )
-				&& $user->getRealName() !== reset( $attr[$wgSamlRealnameAttr] )
-			) {
-				$changed = true;
-				$user->setRealName( reset( $attr[$wgSamlRealnameAttr] ) );
-			}
-			if ( $user->getEmail() !== reset( $attr[$wgSamlMailAttr] ) ) {
-				$changed = true;
-				$user->setEmail( reset( $attr[$wgSamlMailAttr] ) );
-				$user->ConfirmEmail();
-			}
-			if ( $changed ) {
-				$user->saveSettings();
-			}
-			self::setGroups( $user, $attr );
+		if ( !$user->getId() ) {
+			$user->setName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
+			$user->addToDatabase();
+		} elseif ( $changed ) {
+			$user->saveSettings();
 		}
 	}
 
 	/**
 	 * Add groups based on the existence of attributes in the SAML assertion.
 	 *
-	 * @param $user User add MediaWiki permissions to this user from its SAML assertion
-	 * @param $attr string[][] SAML attributes from assertion
+	 * @param User $user add MediaWiki permissions to this user from the current SAML assertion
 	 *
 	 * @return void $user is modified on return
 	 */
-	protected static function setGroups( $user, $attr ) {
+	protected static function setGroups( User $user ) {
 		global $wgSamlGroupMap;
-		
+
+		$attr = self::$as->getAttributes();
+
 		foreach( $wgSamlGroupMap as $group => $rules ) {
 			foreach( $rules as $attrName => $needles ) {
 				if ( !isset( $attr[$attrName] ) ) {
