@@ -189,6 +189,11 @@ class SimpleSamlAuth {
 		if ( self::$as->isAuthenticated() ) {
 			if ( isset( $wgSamlPostLogoutRedirect ) ) {
 				self::$as->logout( $wgSamlPostLogoutRedirect );
+			} elseif ( $returnTo = $wgRequest->getVal( 'returnto' ) ) {
+				$page = Title::newFromText( $returnTo );
+				if ( isset( $page ) ) {
+					self::$as->logout( $page->getFullUrl() );
+				}
 			} else {
 				self::$as->logout();
 			}
@@ -281,7 +286,7 @@ class SimpleSamlAuth {
 	 */
 	public static function hookPersonalUrls( array &$personal_urls, Title $title ) {
 		if ( !self::init() ) return true;
-		global $wgSamlRequirement
+		global $wgSamlRequirement;
 		global $wgSamlPostLogoutRedirect;
 		global $wgRequest;
 
