@@ -322,6 +322,12 @@ class SimpleSamlAuth {
 	 */
 	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
 		if ( !self::init() ) return true;
+		global $wgWhitelistRead;
+		global $wgSamlRequirement;
+
+		if ( in_array( $title, $wgWhitelistRead ) ) {
+			$wgSamlRequirement = min( $wgSamlRequirement, SAML_LOGIN_ONLY );
+		}
 		$user->load();
 		return true;
 	}
