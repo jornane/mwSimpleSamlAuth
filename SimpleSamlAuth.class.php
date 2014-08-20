@@ -186,6 +186,7 @@ class SimpleSamlAuth {
 	public static function hookUserLogout() {
 		if ( !self::init() ) return true;
 		global $wgSamlPostLogoutRedirect;
+		global $wgRequest;
 
 		if ( self::$as->isAuthenticated() ) {
 			if ( isset( $wgSamlPostLogoutRedirect ) ) {
@@ -376,6 +377,7 @@ class SimpleSamlAuth {
 	 */
 	protected static function updateUser( User $user, $attr ) {
 		global $wgSamlRealnameAttr;
+		global $wgSamlUsernameAttr;
 		global $wgSamlMailAttr;
 		global $wgContLang;
 
