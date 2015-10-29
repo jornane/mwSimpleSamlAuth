@@ -227,6 +227,10 @@ class SimpleSamlAuth {
 			return true;
 		}
 
+		if ( session_id() == '' ) {
+			wfSetupSession();
+		}
+
 		if ( $wgSamlRequirement >= SAML_REQUIRED ) {
 			self::$as->requireAuth();
 		}
