@@ -22,12 +22,12 @@ if (!defined('MEDIAWIKI')) {
 	die("This is a MediaWiki extension, and must be run from within MediaWiki.\n");
 }
 
-$wgExtensionMessagesFiles['SimpleSamlAuth'] =
+$GLOBALS['wgExtensionMessagesFiles']['SimpleSamlAuth'] =
 	__DIR__ . DIRECTORY_SEPARATOR . 'SimpleSamlAuth.i18n.php';
-$wgAutoloadClasses['SimpleSamlAuth'] =
+$GLOBALS['wgAutoloadClasses']['SimpleSamlAuth'] =
 	__DIR__ . DIRECTORY_SEPARATOR . 'SimpleSamlAuth.class.php';
 
-$wgExtensionCredits['other'][] = array(
+$GLOBALS['wgExtensionCredits']['other'][] = array(
 	'path' => __FILE__,
 	'name' => 'SimpleSamlAuth',
 	'version' => 'GIT-master',
@@ -36,36 +36,36 @@ $wgExtensionCredits['other'][] = array(
 	'descriptionmsg' => 'simplesamlauth-desc'
 );
 
-$wgHooks['UserLoadFromSession'][]    = 'SimpleSamlAuth::hookLoadSession';
-$wgHooks['GetPreferences'][]         = 'SimpleSamlAuth::hookGetPreferences';
-$wgHooks['SpecialPage_initList'][]   = 'SimpleSamlAuth::hookSpecialPage_initList';
-$wgHooks['UserLoginForm'][]          = 'SimpleSamlAuth::hookLoginForm';
-$wgHooks['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookUserLogout';
-$wgHooks['PersonalUrls'][]           = 'SimpleSamlAuth::hookPersonalUrls';
-$wgHooks['MediaWikiPerformAction'][] = 'SimpleSamlAuth::hookMediaWikiPerformAction';
+$GLOBALS['wgHooks']['UserLoadFromSession'][]    = 'SimpleSamlAuth::hookLoadSession';
+$GLOBALS['wgHooks']['GetPreferences'][]         = 'SimpleSamlAuth::hookGetPreferences';
+$GLOBALS['wgHooks']['SpecialPage_initList'][]   = 'SimpleSamlAuth::hookSpecialPage_initList';
+$GLOBALS['wgHooks']['UserLoginForm'][]          = 'SimpleSamlAuth::hookLoginForm';
+$GLOBALS['wgHooks']['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookUserLogout';
+$GLOBALS['wgHooks']['PersonalUrls'][]           = 'SimpleSamlAuth::hookPersonalUrls';
+$GLOBALS['wgHooks']['MediaWikiPerformAction'][] = 'SimpleSamlAuth::hookMediaWikiPerformAction';
 
 define('SAML_OPTIONAL', 0);
 define('SAML_LOGIN_ONLY', 1);
 define('SAML_REQUIRED', 2);
 
-$wgSamlRequirement = SAML_OPTIONAL;
-$wgSamlCreateUser = false;
-$wgSamlConfirmMail = false;
+$GLOBALS['wgSamlRequirement'] = SAML_OPTIONAL;
+$GLOBALS['wgSamlCreateUser'] = false;
+$GLOBALS['wgSamlConfirmMail'] = false;
 
-$wgSamlAuthSource = 'default-sp';
-$wgSamlSspRoot = rtrim(__DIR__, DIRECTORY_SEPARATOR)
+$GLOBALS['wgSamlAuthSource'] = 'default-sp';
+$GLOBALS['wgSamlSspRoot'] = rtrim(__DIR__, DIRECTORY_SEPARATOR)
                . DIRECTORY_SEPARATOR
                . 'simplesamlphp'
                . DIRECTORY_SEPARATOR
                ;
-$wgSamlPostLogoutRedirect = null;
+$GLOBALS['wgSamlPostLogoutRedirect'] = null;
 
-$wgSamlGroupMap = array(
+$GLOBALS['wgSamlGroupMap'] = array(
 	'sysop' => array(
 		'groups' => array('admin'),
 	),
 );
 
-$wgSamlUsernameAttr = 'uid';
-$wgSamlRealnameAttr = 'cn';
-$wgSamlMailAttr = 'mail';
+$GLOBALS['wgSamlUsernameAttr'] = 'uid';
+$GLOBALS['wgSamlRealnameAttr'] = 'cn';
+$GLOBALS['wgSamlMailAttr'] = 'mail';
