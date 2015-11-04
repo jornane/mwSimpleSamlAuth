@@ -105,6 +105,9 @@ An array as illustrated here will add users to the `sysop` MediaWiki group, if t
 If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/yorn/sspmod_role).
 
 ## Known Issues
+### Weird things happen with sessions / I must click Save twice before the page saves
+This has to do with the value of `$wgSessionName`. This value must be set to `ini_get('session.name')` if you use PHP sessions in both SimpleSamlPhp and MediaWiki.  From version 0.5, SimpleSamlAuth will take care of this automatically.
+
 ### SAML users can edit their e-mail address
 Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences).
 Ubuntu 12.04 LTS comes with MediaWiki 1.15.
