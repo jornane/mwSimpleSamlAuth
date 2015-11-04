@@ -1,0 +1,14 @@
+{
+	"name": "mediawiki/simple-saml-auth",
+	"description": "Enables SAML authentication using SimpleSAMLphp.",
+	"homepage": "https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth",
+	"type": "mediawiki-extension",
+	"license" : "LGPL-3.0+",
+	"autoload": {
+		"files": ["SimpleSamlAuth.php"]
+	},
+	"require": {
+		"php": ">=5.4",
+		"composer/installers": "~1"
+	}
+}
