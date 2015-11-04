@@ -1,7 +1,7 @@
 <?php
 /**
  * SimpleSamlAuth - LGPL 3.0 licensed
- * Copyright (C) 2014  Yørn de Jong
+ * Copyright (C) 2015  Jørn Åne
  *
  * SAML authentication MediaWiki extension using SimpleSamlPhp.
  *
@@ -11,11 +11,11 @@
  *
  * @link https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth Documentation
  * @link https://www.mediawiki.org/wiki/Extension_talk:SimpleSamlAuth Support
- * @link https://github.com/yorn/mwSimpleSamlAuth Source Code
+ * @link https://github.com/jornane/mwSimpleSamlAuth Source Code
  *
  * @license http://www.gnu.org/licenses/lgpl.html LGPL (GNU Lesser General Public License)
- * @copyright (C) 2014, Yørn de Jong
- * @author Yørn de Jong
+ * @copyright (C) 2015, Jørn Åne
+ * @author Jørn Åne
  */
 
 if (!defined('MEDIAWIKI')) {
@@ -31,7 +31,7 @@ $GLOBALS['wgExtensionCredits']['other'][] = array(
 	'path' => __FILE__,
 	'name' => 'SimpleSamlAuth',
 	'version' => 'GIT-master',
-	'author' => 'Yørn de Jong',
+	'author' => 'Jørn Åne',
 	'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
 	'descriptionmsg' => 'simplesamlauth-desc'
 );

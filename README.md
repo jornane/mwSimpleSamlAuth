@@ -24,7 +24,7 @@ If you encounter problems during the preparation, please [look here](http://simp
 * Clone this repository into your MediaWikis *extensions* directory, and call it **SimpleSamlAuth**.
 
 ```bash
-git clone git@github.com:yorn/mwSimpleSamlAuth.git SimpleSamlAuth
+git clone git@github.com:jornane/mwSimpleSamlAuth.git SimpleSamlAuth
 ```
 
 * Add the following lines to **LocalSettings.php** in your MediaWiki installation:
@@ -102,7 +102,7 @@ $wgSamlGroupMap = array(
 );
 ```
 An array as illustrated here will add users to the `sysop` MediaWiki group, if they have a SAML attribute named `groups` with at least a value `admin`.
-If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/yorn/sspmod_role).
+If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/jornane/sspmod_role).
 
 ## Known Issues
 ### Weird things happen with sessions / I must click Save twice before the page saves
@@ -125,4 +125,4 @@ If SimpleSamlPhp presents a valid session, SimpleSamlAuth simply finds a local M
 This newly created user will have no password, but will be able to reset their password if a valid e-mail address has been set.
 
 ### Other issue?
-Please report it on the project's [GitHub issues page](https://github.com/yorn/mwSimpleSamlAuth/issues).
+Please report it on the project's [GitHub issues page](https://github.com/jornane/mwSimpleSamlAuth/issues).

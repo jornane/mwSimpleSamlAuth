@@ -1,7 +1,7 @@
 <?php
 /**
  * SimpleSamlAuth - LGPL 3.0 licensed
- * Copyright (C) 2014  Yørn de Jong
+ * Copyright (C) 2015  Jørn Åne
  *
  * SAML authentication class using SimpleSamlPhp.
  *
@@ -14,8 +14,8 @@
  * @defgroup SimpleSamlAuth
  *
  * @license http://www.gnu.org/licenses/lgpl.html LGPL (GNU Lesser General Public License)
- * @copyright (C) 2014, Yørn de Jong
- * @author Yørn de Jong
+ * @copyright (C) 2015, Jørn Åne
+ * @author Jørn Åne
  */
 
 if ( !defined( 'MEDIAWIKI' ) ) {

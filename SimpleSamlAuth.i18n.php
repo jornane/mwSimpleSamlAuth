@@ -2,7 +2,7 @@
 /**
  * Internationalisation file for the SimpleSamlAuth extension
  *
- * @copyright (C) 2014, Yørn de Jong
+ * @copyright (C) 2015, Jørn Åne
  * @license http://www.gnu.org/licenses/lgpl.html LGPL (GNU Lesser General Public License)
  *
  * @file
@@ -12,13 +12,13 @@
 $messages = array();
 
 /** English
- * @author Yørn de Jong
+ * @author Jørn Åne
  * @author Kghbln
  */
 $messages['en'] = array(
 	'simplesamlauth-desc' => 'Enables SAML authentication using [//simplesamlphp.org/ SimpleSAMLphp].',
 	'simplesamlauth-login' => 'Log in using SAML',
-	'simplesamlauth-pagedisabled' => 'This page has been disabled by the [//github.com/yorn/mwSimpleSamlAuth SimpleSamlAuth] extension.',
+	'simplesamlauth-pagedisabled' => 'This page has been disabled by the [//github.com/jornane/mwSimpleSamlAuth SimpleSamlAuth] extension.',
 );
 
 /** German (Deutsch)
@@ -29,39 +29,39 @@ $messages['de'] = array(
 );
 
 /** Norwegian (bokmål)
- * @author Yørn de Jong
+ * @author Jørn Åne
  */
 $messages['nb'] = array(
 	'simplesamlauth-desc' => 'Gjør SAML-autentisering mulig ved hjelp av [//simplesamlphp.org/ SimpleSAMLphp].',
 	'simplesamlauth-login' => 'Logg inn ved hjelp av SAML',
-	'simplesamlauth-pagedisabled' => 'Denne siden er deaktivert av [//github.com/yorn/mwSimpleSamlAuth SimpleSamlAuth]-utvidelsen.',
+	'simplesamlauth-pagedisabled' => 'Denne siden er deaktivert av [//github.com/jornane/mwSimpleSamlAuth SimpleSamlAuth]-utvidelsen.',
 );
 
 /** Norwegian (nynorsk)
- * @author Yørn de Jong
+ * @author Jørn Åne
  */
 $messages['nn'] = array(
 	'simplesamlauth-desc' => 'Gjer SAML-autentisering mogeleg ved hjelp av [//simplesamlphp.org/ SimpleSAMLphp].',
 	'simplesamlauth-login' => 'Logg inn ved hjelp av SAML',
-	'simplesamlauth-pagedisabled' => 'Denne sida er deaktivert av [//github.com/yorn/mwSimpleSamlAuth SimpleSamlAuth]-utvidinga.',
+	'simplesamlauth-pagedisabled' => 'Denne sida er deaktivert av [//github.com/jornane/mwSimpleSamlAuth SimpleSamlAuth]-utvidinga.',
 );
 
 /** Dutch (Nederlands)
- * @author Yørn de Jong
+ * @author Jørn Åne
  */
 $messages['nl'] = array(
 	'simplesamlauth-desc' => 'Maakt SAML-authenticatie mogelijk via [//simplesamlphp.org/ SimpleSAMLphp].',
 	'simplesamlauth-login' => 'Aanmelden via SAML',
-	'simplesamlauth-pagedisabled' => 'Deze pagina is uitgeschakeld door de [//github.com/yorn/mwSimpleSamlAuth SimpleSamlAuth] uitbreiding.',
+	'simplesamlauth-pagedisabled' => 'Deze pagina is uitgeschakeld door de [//github.com/jornane/mwSimpleSamlAuth SimpleSamlAuth] uitbreiding.',
 );
 
 /** Frisian (Frysk)
- * @author Yørn de Jong
+ * @author Jørn Åne
  */
 $messages['fy'] = array(
 	'simplesamlauth-desc' => 'Makket SAML-autentikaasje mooglik fia [//simplesamlphp.org/ SimpleSAMLphp].',
 	'simplesamlauth-login' => 'Oanmelde mei SAML',
-	'simplesamlauth-pagedisabled' => 'Dizze side is útskeakele troch de [//github.com/yorn/mwSimpleSamlAuth SimpleSamlAuth] útwreiding.',
+	'simplesamlauth-pagedisabled' => 'Dizze side is útskeakele troch de [//github.com/jornane/mwSimpleSamlAuth SimpleSamlAuth] útwreiding.',
 );
 
 /** Estonian
