@@ -52,13 +52,12 @@ class SimpleSamlAuth {
 			return true;
 		}
 
-		if((!isset($wgSessionName) || !$wgSessionName)
-			&& (!isset($wgSessionsInObjectCache) || !$wgSessionsInObjectCache)
-			&& (!isset($wgSessionsInMemcached) || !$wgSessionsInMemcached)
+		if ( ( !isset( $wgSessionName ) || !$wgSessionName )
+			&& ( !isset( $wgSessionsInObjectCache ) || !$wgSessionsInObjectCache )
+			&& ( !isset( $wgSessionsInMemcached ) || !$wgSessionsInMemcached )
 		) {
-			$wgSessionName = ini_get('session.name');
+			$wgSessionName = ini_get( 'session.name' );
 		}
-
 
 		// Load the simpleSamlPhp service
 		require_once rtrim( $wgSamlSspRoot, DIRECTORY_SEPARATOR ) .
@@ -92,7 +91,9 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookGetPreferences( $user, &$preferences ) {
-		if ( !self::init() ) return true;
+		if ( !self::init() ) {
+			return true;
+		}
 		global $wgSamlRequirement;
 		global $wgSamlRealnameAttr;
 
@@ -123,7 +124,9 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookSpecialPage_initList( &$pages ) {
-		if ( !self::init() ) return true;
+		if ( !self::init() ) {
+			return true;
+		}
 		global $wgSamlRequirement;
 
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY || self::$as->isAuthenticated() ) {
@@ -154,7 +157,9 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookLoginForm( &$template ) {
-		if ( !self::init() ) return true;
+		if ( !self::init() ) {
+			return true;
+		}
 		global $wgSamlRequirement;
 
 		$url = self::$as->getLoginURL( Title::newMainPage()->getFullUrl() );
@@ -162,7 +167,7 @@ class SimpleSamlAuth {
 		if ( $wgSamlRequirement >= SAML_LOGIN_ONLY ) {
 			self::$as->requireAuth( array(
 				'ReturnTo' => Title::newMainPage()->getFullUrl(),
-				'KeepPost' => FALSE,
+				'KeepPost' => false,
 			) );
 			$err = wfMessage( 'simplesamlauth-pagedisabled' )->parse();
 			return $err;
@@ -192,14 +197,17 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookUserLogout() {
-		if ( !self::init() ) return true;
+		if ( !self::init() ) {
+			return true;
+		}
 		global $wgSamlPostLogoutRedirect;
 		global $wgRequest;
 
 		if ( self::$as->isAuthenticated() ) {
+			$returnTo = $wgRequest->getVal( 'returnto' );
 			if ( isset( $wgSamlPostLogoutRedirect ) ) {
 				self::$as->logout( $wgSamlPostLogoutRedirect );
-			} elseif ( $returnTo = $wgRequest->getVal( 'returnto' ) ) {
+			} elseif ( $returnTo ) {
 				$page = Title::newFromText( $returnTo );
 				if ( isset( $page ) ) {
 					self::$as->logout( $page->getFullUrl() );
@@ -223,7 +231,9 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookLoadSession( $user, &$result ) {
-		if ( !self::init() ) return true;
+		if ( !self::init() ) {
+			return true;
+		}
 		global $wgSamlRequirement;
 		global $wgSamlUsernameAttr;
 		global $wgBlockDisablesLogin;
@@ -282,7 +292,9 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookPersonalUrls( array &$personal_urls, Title $title ) {
-		if ( !self::init() ) return true;
+		if ( !self::init() ) {
+			return true;
+		}
 		global $wgSamlRequirement;
 		global $wgSamlPostLogoutRedirect;
 		global $wgRequest;
@@ -303,11 +315,11 @@ class SimpleSamlAuth {
 				}
 			}
 			if ( !self::$as->isAuthenticated() ) {
-				foreach( array( 'login', 'anonlogin' ) as $link ) {
+				$returnTo = $wgRequest->getVal( 'returnto' );
+				foreach ( array( 'login', 'anonlogin' ) as $link ) {
 					if ( isset( $personal_urls[$link] ) ) {
-						if ( $returnTo = $wgRequest->getVal( 'returnto' )
-							&& $page = Title::newFromText( $returnTo )
-						) {
+						if ( $returnTo && Title::newFromText( $returnTo ) ) {
+							$page = Title::newFromTextThrow( $returnTo );
 							$url = $page->getFullUrl();
 							$personal_urls[$link]['href'] = self::$as->getLoginURL( $url );
 						} elseif ( $title->isSpecial( 'Userlogout' ) ) {
@@ -325,7 +337,8 @@ class SimpleSamlAuth {
 	}
 
 	/**
-	 * Use this to do something completely different, after the basic globals have been set up, but before ordinary actions take place.
+	 * Use this to do something completely different, after the basic globals have been set up,
+	 * but before ordinary actions take place.
 	 *
 	 * Takes control of the session before a stray SubmitAction calls wfSetupSession() for us.
 	 * This is a bug in MediaWiki which has not been fixed yet.
@@ -342,7 +355,7 @@ class SimpleSamlAuth {
 	 *
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
-	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
+	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $req, $w ) {
 		// Just running init will set the correct session cookie name.
 		// This will prevent the session being initiated
 		// with the wrong cookie name.
@@ -385,8 +398,7 @@ class SimpleSamlAuth {
 		} else {
 			return 'User "'
 			     . htmlentities( reset( $attr[$wgSamlUsernameAttr] ) )
-			     . "\" does not exist and \"\$wgSamlCreateUser\" flag is false.\n"
-			     ;
+			     . "\" does not exist and \"\$wgSamlCreateUser\" flag is false.\n";
 		}
 	}
 
@@ -422,7 +434,7 @@ class SimpleSamlAuth {
 		}
 		if ( !$user->getId() ) {
 			$user->setName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
-			$user->setPassword(null); // prevent manual login until reset
+			$user->setPassword( null ); // prevent manual login until reset
 			$user->addToDatabase();
 		} elseif ( $changed ) {
 			$user->saveSettings();
@@ -441,12 +453,12 @@ class SimpleSamlAuth {
 
 		$attr = self::$as->getAttributes();
 
-		foreach( $wgSamlGroupMap as $group => $rules ) {
-			foreach( $rules as $attrName => $needles ) {
+		foreach ( $wgSamlGroupMap as $group => $rules ) {
+			foreach ( $rules as $attrName => $needles ) {
 				if ( !isset( $attr[$attrName] ) ) {
 					continue;
 				}
-				foreach( $needles as $needle ) {
+				foreach ( $needles as $needle ) {
 					if ( in_array( $needle, $attr[$attrName] ) ) {
 						$user->addGroup( $group );
 					} else {

@@ -18,8 +18,8 @@
  * @author Jørn Åne
  */
 
-if (!defined('MEDIAWIKI')) {
-	die("This is a MediaWiki extension, and must be run from within MediaWiki.\n");
+if ( !defined( 'MEDIAWIKI' ) ) {
+	die( "This is a MediaWiki extension, and must be run from within MediaWiki.\n" );
 }
 
 $GLOBALS['wgExtensionMessagesFiles']['SimpleSamlAuth'] =
@@ -44,25 +44,24 @@ $GLOBALS['wgHooks']['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookUserLogou
 $GLOBALS['wgHooks']['PersonalUrls'][]           = 'SimpleSamlAuth::hookPersonalUrls';
 $GLOBALS['wgHooks']['MediaWikiPerformAction'][] = 'SimpleSamlAuth::hookMediaWikiPerformAction';
 
-define('SAML_OPTIONAL', 0);
-define('SAML_LOGIN_ONLY', 1);
-define('SAML_REQUIRED', 2);
+define( 'SAML_OPTIONAL', 0 );
+define( 'SAML_LOGIN_ONLY', 1 );
+define( 'SAML_REQUIRED', 2 );
 
 $GLOBALS['wgSamlRequirement'] = SAML_OPTIONAL;
 $GLOBALS['wgSamlCreateUser'] = false;
 $GLOBALS['wgSamlConfirmMail'] = false;
 
 $GLOBALS['wgSamlAuthSource'] = 'default-sp';
-$GLOBALS['wgSamlSspRoot'] = rtrim(__DIR__, DIRECTORY_SEPARATOR)
-               . DIRECTORY_SEPARATOR
-               . 'simplesamlphp'
-               . DIRECTORY_SEPARATOR
-               ;
+$GLOBALS['wgSamlSspRoot'] = rtrim( __DIR__, DIRECTORY_SEPARATOR )
+			   . DIRECTORY_SEPARATOR
+			   . 'simplesamlphp'
+			   . DIRECTORY_SEPARATOR;
 $GLOBALS['wgSamlPostLogoutRedirect'] = null;
 
 $GLOBALS['wgSamlGroupMap'] = array(
 	'sysop' => array(
-		'groups' => array('admin'),
+		'groups' => array( 'admin' ),
 	),
 );
 
