@@ -52,6 +52,14 @@ class SimpleSamlAuth {
 			return true;
 		}
 
+		if((!isset($wgSessionName) || !$wgSessionName)
+			&& (!isset($wgSessionsInObjectCache) || !$wgSessionsInObjectCache)
+			&& (!isset($wgSessionsInMemcached) || !$wgSessionsInMemcached)
+		) {
+			$wgSessionName = ini_get('session.name');
+		}
+
+
 		// Load the simpleSamlPhp service
 		require_once rtrim( $wgSamlSspRoot, DIRECTORY_SEPARATOR ) .
 			DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
