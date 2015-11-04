@@ -246,7 +246,7 @@ class SimpleSamlAuth {
 			}
 			self::loadUser( $user, $attr );
 			if ( $wgBlockDisablesLogin && $user->isBlocked() ) {
-				$block = $this->getUser()->getBlock();
+				$block = $user->getBlock();
 				throw new UserBlockedError( $block );
 			} else {
 				// Set that we authenticated a user
