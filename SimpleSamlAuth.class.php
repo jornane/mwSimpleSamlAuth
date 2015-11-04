@@ -235,10 +235,6 @@ class SimpleSamlAuth {
 			return true;
 		}
 
-		if ( session_id() == '' ) {
-			wfSetupSession();
-		}
-
 		if ( $wgSamlRequirement >= SAML_REQUIRED ) {
 			self::$as->requireAuth();
 		}
@@ -253,10 +249,23 @@ class SimpleSamlAuth {
 				$block = $this->getUser()->getBlock();
 				throw new UserBlockedError( $block );
 			} else {
+				// Set that we authenticated a user
 				$result = true;
+				// Some MediaWiki internals need a session
+				// to function. Since we authenticated
+				// from the outside, the MediaWiki session
+				// might not have been initialized.
+				if ( session_id() == '' ) {
+					wfSetupSession();
+				}
+				// Apparently, nothing went wrong, and we
+				// have a fancy user from a SAML assertion.
+				// Success! Return true for no errors.
 				return true;
 			}
 		}
+		// Not authenticated, but no errors either
+		// Return means success, $result is still false
 		return true;
 	}
 
@@ -334,8 +343,10 @@ class SimpleSamlAuth {
 	 * @return boolean|string true on success, false on silent error, string on verbose error
 	 */
 	public static function hookMediaWikiPerformAction( $output, $article, $title, $user, $request, $wiki ) {
-		if ( !self::init() ) return true;
-		$user->load();
+		// Just running init will set the correct session cookie name.
+		// This will prevent the session being initiated
+		// with the wrong cookie name.
+		self::init();
 		return true;
 	}
 
