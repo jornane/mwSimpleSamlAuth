@@ -1,5 +1,5 @@
 {
-	"name": "mediawiki/simplesamlauth",
+	"name": "mediawiki/simple-saml-auth",
 	"description": "Enables SAML authentication using SimpleSAMLphp.",
 	"homepage": "https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth",
 	"type": "mediawiki-extension",
