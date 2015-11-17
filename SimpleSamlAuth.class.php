@@ -44,6 +44,9 @@ class SimpleSamlAuth {
 	private static function init() {
 		global $wgSamlSspRoot;
 		global $wgSamlAuthSource;
+		global $wgSessionName;
+		global $wgSessionsInMemcached;
+		global $wgSessionsInObjectCache;
 
 		if ( !self::$armed ) {
 			return false;
