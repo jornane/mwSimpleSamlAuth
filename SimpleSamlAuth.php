@@ -33,6 +33,7 @@ $GLOBALS['wgExtensionCredits']['other'][] = array(
 	'version' => 'GIT-master',
 	'author' => 'Jørn Åne',
 	'url' => 'https://www.mediawiki.org/wiki/Extension:SimpleSamlAuth',
+	'license-name' => 'LGPL-3.0+',
 	'descriptionmsg' => 'simplesamlauth-desc'
 );
 
