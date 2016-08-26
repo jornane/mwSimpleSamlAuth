@@ -437,8 +437,8 @@ class SimpleSamlAuth {
 		}
 		if ( !$user->getId() ) {
 			$user->setName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
+			$user->addToDatabase(); // must be done first since MW 1.27
 			$user->setInternalPassword( null ); // prevent manual login until reset
-			$user->addToDatabase();
 		} elseif ( $changed ) {
 			$user->saveSettings();
 		}
