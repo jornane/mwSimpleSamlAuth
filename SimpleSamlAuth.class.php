@@ -439,8 +439,15 @@ class SimpleSamlAuth {
 		}
 		if ( !$user->getId() ) {
 			$user->setName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
-			$user->addToDatabase(); // must be done first since MW 1.27
-			$user->setInternalPassword( null ); // prevent manual login until reset
+			if ( version_compare( $wgVersion, '1.26', '<=' ) ) {
+				// MW 1.26 and below uses AuthPlugin, which wants setPassword first
+				$user->setInternalPassword( null ); // prevent manual login until reset
+				$user->addToDatabase();
+			} else {
+				// MW 1.27 and up uses AuthManager, which wants addToDatabase first
+				$user->addToDatabase();
+				$user->setInternalPassword( null ); // prevent manual login until reset
+			}
 		} elseif ( $changed ) {
 			$user->saveSettings();
 		}
