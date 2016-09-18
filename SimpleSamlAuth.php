@@ -44,6 +44,7 @@ $GLOBALS['wgHooks']['UserLoginForm'][]          = 'SimpleSamlAuth::hookLoginForm
 $GLOBALS['wgHooks']['UserLogoutComplete'][]     = 'SimpleSamlAuth::hookUserLogout';
 $GLOBALS['wgHooks']['PersonalUrls'][]           = 'SimpleSamlAuth::hookPersonalUrls';
 $GLOBALS['wgHooks']['MediaWikiPerformAction'][] = 'SimpleSamlAuth::hookMediaWikiPerformAction';
+$GLOBALS['wgHooks']['ArticleFromTitle'][]       = 'SimpleSamlAuth::hookArticleFromTitle';
 
 define( 'SAML_OPTIONAL', 0 );
 define( 'SAML_LOGIN_ONLY', 1 );

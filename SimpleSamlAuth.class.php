@@ -369,6 +369,37 @@ class SimpleSamlAuth {
 	}
 
 	/**
+	 * Called to determine the class to handle the article rendering, based on title
+	 *
+	 * Reads the requested title.  If the title matches any title mentioned in $wgWhitelistRead,
+	 * the value of $wgSamlRequirement will be lowered to be SAML_LOGIN_ONLY at most.
+	 *
+	 * The effect of this, is that the site admin can use SAML_REQUIRED but still open some
+	 * pages to be queried by anonymous users.  This may be useful for allowing bots to read
+	 * pages, for example.
+	 *
+	 * This hook is only called for articles, so it is not possible to whitelist special pages
+	 * this way.
+	 *
+	 * @link https://www.mediawiki.org/wiki/Manual:Hooks/ArticleFromTitle
+	 * @link https://www.mediawiki.org/wiki/Manual:$wgWhitelistRead
+	 */
+	public static function hookArticleFromTitle( &$title, &$article, $context ) {
+		if ( !self::init() ) {
+			return true;
+		}
+
+		global $wgWhitelistRead;
+		global $wgSamlRequirement;
+
+		if ( is_array( $wgWhitelistRead ) && in_array( $title, $wgWhitelistRead ) ) {
+			$wgSamlRequirement = min( $wgSamlRequirement, SAML_LOGIN_ONLY );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Return a user object that corresponds to the current SAML assertion.
 	 * If no SAML assertion is set, the function returns null.
 	 * If the user doesn't exist, and auto create has been turned on in the config,
