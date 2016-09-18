@@ -257,7 +257,8 @@ class SimpleSamlAuth {
 			if ( !User::isUsableName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) ) ) {
 				return 'Illegal username: ' . reset( $attr[$wgSamlUsernameAttr] );
 			}
-			self::loadUser( $user, $attr );
+			$loadError = self::loadUser( $user, $attr );
+			if ( $loadError ) return $loadError;
 			if ( $wgBlockDisablesLogin && $user->isBlocked() ) {
 				$block = $user->getBlock();
 				throw new UserBlockedError( $block );
