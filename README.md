@@ -104,6 +104,12 @@ $wgSamlGroupMap = array(
 An array as illustrated here will add users to the `sysop` MediaWiki group, if they have a SAML attribute named `groups` with at least a value `admin`.
 If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/jornane/sspmod_role).
 
+### [$wgSessionName](https://www.mediawiki.org/wiki/Manual:$wgSessionName)
+The name of the cookie containing the session ID. When using PHP's built-in session management in both PHP and SimpleSamlPhp, this *must* match the session name used by PHP. It should not be necessary to set this.
+
+### [$wgWhitelistRead](https://www.mediawiki.org/wiki/Manual:$wgWhitelistRead)
+Array of page names that can be read without being redirected to the IdP. This may be useful on sites where SAML login is required, but some pages are publicly readable. Has no effect in the behaviour of this extension unless `$wgSamlRequirement` is `SAML_REQUIRED`.
+
 ## Known Issues
 ### Weird things happen with sessions / I must click Save twice before the page saves
 This has to do with the value of `$wgSessionName`. This value must be set to `ini_get('session.name')` if you use PHP sessions in both SimpleSamlPhp and MediaWiki.  From version 0.5, SimpleSamlAuth will take care of this automatically.
