@@ -59,6 +59,7 @@ class SimpleSamlAuth {
 			&& ( !isset( $wgSessionsInObjectCache ) || !$wgSessionsInObjectCache )
 			&& ( !isset( $wgSessionsInMemcached ) || !$wgSessionsInMemcached )
 		) {
+			ini_restore( 'session.name' );
 			$wgSessionName = ini_get( 'session.name' );
 		}
 
