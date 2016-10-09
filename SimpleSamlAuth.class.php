@@ -461,12 +461,17 @@ class SimpleSamlAuth {
 			$changed = true;
 			$user->setRealName( reset( $attr[$wgSamlRealnameAttr] ) );
 		}
-		if ( $attr[$wgSamlMailAttr]
-			&& $user->getEmail() !== reset( $attr[$wgSamlMailAttr] )
+		if ( isset( $wgSamlMailAttr )
+			&& isset( $attr[$wgSamlMailAttr] )
+			&& $attr[$wgSamlMailAttr]
+			&& (
+			!$user->isEmailConfirmed()
+				|| $user->getEmail() !== reset( $attr[$wgSamlMailAttr] )
+			)
 		) {
 			$changed = true;
 			$user->setEmail( reset( $attr[$wgSamlMailAttr] ) );
-			$user->ConfirmEmail();
+			$user->confirmEmail();
 		}
 		if ( !$user->getId() ) {
 			$user->setName( $wgContLang->ucfirst( reset( $attr[$wgSamlUsernameAttr] ) ) );
