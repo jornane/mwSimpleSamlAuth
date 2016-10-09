@@ -9,6 +9,10 @@
 * [SimpleSamlPhp](//simplesamlphp.org) (tested on 1.11 and newer)
 * [MediaWiki](//mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
 
+**IMPORTANT** If you run MediaWiki 1.27 or newer, SimpleSamlPhp **MUST** be configured to use an alternative session handler.
+If this is not done, SAML authentication succeeds, but MediaWiki still shows that nobody is logged in.
+Please refer to [the SimpleSamlPhp website](//simplesamlphp.org/docs/stable/simplesamlphp-maintenance) on how to configure SimpleSamlPhp for session storage.
+
 ## Preparation
 * Install SimpleSamlPhp on the same domain as your MediaWiki installation.
 * In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works.
