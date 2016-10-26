@@ -451,6 +451,7 @@ class SimpleSamlAuth {
 		global $wgSamlUsernameAttr;
 		global $wgSamlMailAttr;
 		global $wgContLang;
+		global $wgVersion;
 
 		$changed = false;
 		if ( isset( $wgSamlRealnameAttr )
