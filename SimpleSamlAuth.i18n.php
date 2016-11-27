@@ -84,3 +84,14 @@ $messages['et'] = array(
 	'simplesamlauth-login' => 'Logi sisse SAMLi kaudu',
 );
 
+/** Russian
+ * @author Anton Kheystver
+ */
+$messages['ru'] = array(
+	'simplesamlauth-desc' => 'Активирует SAML аутентификацию с помощью '
+		. '[//simplesamlphp.org/ SimpleSAMLphp].',
+	'simplesamlauth-login' => 'Войти с помощью SAML',
+	'simplesamlauth-pagedisabled' => 'Эта страница была отключена модулем '
+		. '[//github.com/jornane/mwSimpleSamlAuth SimpleSamlAuth].',
+);
+
