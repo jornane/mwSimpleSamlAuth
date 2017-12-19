@@ -6,7 +6,7 @@
 * **MediaWiki** Open source Wiki software.
 
 ## Requirements
-* [SimpleSamlPhp](//simplesamlphp.org) (tested on 1.11 and newer)
+* [SimpleSAMLphp](//simplesamlphp.org) (tested on 1.15 and newer)
 * [MediaWiki](//mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
 
 **IMPORTANT** If you run MediaWiki 1.27 or newer, SimpleSamlPhp **MUST** be configured to use an alternative session handler.
