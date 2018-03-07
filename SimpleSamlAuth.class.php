@@ -496,23 +496,42 @@ class SimpleSamlAuth {
 	 * @param User $user add MediaWiki permissions to this user from the current SAML assertion
 	 *
 	 * @return void $user is modified on return
+	 *
+	 * @note $wgSamlGroupMap is in the form:
+	 * $wgSamlGroupMap = [
+	 *     'mediawikigroup' => [
+	 *         'samlAttrName' => ['acceptable','saml','values'],
+	 *     ]
+	 * ]
 	 */
 	protected static function setGroups( User $user ) {
 		global $wgSamlGroupMap;
 
-		$attr = self::$as->getAttributes();
+		$allSamlAttrs = self::$as->getAttributes();
 
-		foreach ( $wgSamlGroupMap as $group => $rules ) {
-			foreach ( $rules as $attrName => $needles ) {
-				if ( !isset( $attr[$attrName] ) ) {
+		foreach ( $wgSamlGroupMap as $mediawikiGroup => $rules ) {
+			foreach ( $rules as $samlAttrName => $okValues ) {
+				if ( ! isset( $allSamlAttrs[ $samlAttrName ] ) ) {
 					continue;
 				}
-				foreach ( $needles as $needle ) {
-					if ( in_array( $needle, $attr[$attrName] ) ) {
-						$user->addGroup( $group );
-					} else {
-						$user->removeGroup( $group );
-					}
+
+				// A SAML attribute could contain a list of values. Likewise,
+				// we may want to specify a list of values that are acceptable
+				// for that attribute. Thus, we have two lists and if there is
+				// any intersection between them then the group should be
+				// applied. If there is no intersection the group should be
+				// removed.
+				$intersections = array_intersect( $okValues, $allSamlAttrs[ $samlAttrName ] );
+
+				if ( count( $intersections ) > 0 ) {
+					$user->addGroup( $mediawikiGroup );
+
+					// User allowed into group. Break out of this foreach and
+					// proceed to the next mediawikiGroup
+					break;
+				}
+				else {
+					$user->removeGroup( $mediawikiGroup );
 				}
 			}
 		}
