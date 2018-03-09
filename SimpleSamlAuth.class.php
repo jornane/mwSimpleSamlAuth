@@ -3,9 +3,9 @@
  * SimpleSamlAuth - LGPL 3.0 licensed
  * Copyright (C) 2015  Jørn Åne
  *
- * SAML authentication class using SimpleSamlPhp.
+ * SAML authentication class using SimpleSAMLphp.
  *
- * This class will log in users from SAML assertions received by SimpleSamlPhp.
+ * This class will log in users from SAML assertions received by SimpleSAMLphp.
  * It does so by settings hooks in MediaWiki which override the session handling system
  * and disable functionality that is redundant for federated logins.
  *
@@ -63,7 +63,7 @@ class SimpleSamlAuth {
 			$wgSessionName = ini_get( 'session.name' );
 		}
 
-		// Load the simpleSamlPhp service
+		// Load the SimpleSAMLphp service
 		require_once rtrim( $wgSamlSspRoot, DIRECTORY_SEPARATOR ) .
 			DIRECTORY_SEPARATOR . 'lib' . DIRECTORY_SEPARATOR . '_autoload.php';
 
@@ -152,7 +152,7 @@ class SimpleSamlAuth {
 	 *
 	 * If SimpleSamlAuth is configured to allow local logons,
 	 * an extra "field" is added to the logon form,
-	 * which is a link/button which will redirect the user to SimpleSamlPhp to logon through SAML.
+	 * which is a link/button which will redirect the user to SimpleSAMLphp to logon through SAML.
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/UserLoginForm
 	 *
@@ -193,7 +193,7 @@ class SimpleSamlAuth {
 
 	/**
 	 * Hooked function, executed when the user visits the UserLogout page.
-	 * This hook will execute the SimpleSamlPhp Single Sign Out feature,
+	 * This hook will execute the SimpleSAMLphp Single Sign Out feature,
 	 * so that the logout is propagated to the IdP.
 	 *
 	 * @link http://www.mediawiki.org/wiki/Manual:Hooks/UserLogout
@@ -285,7 +285,7 @@ class SimpleSamlAuth {
 	}
 
 	/**
-	 * Replace the MediaWiki login/logout links with direct links to SimpleSamlPhp.
+	 * Replace the MediaWiki login/logout links with direct links to SimpleSAMLphp.
 	 * This takes away the need to set up a redirect on the special UserLogin and UserLogout pages,
 	 * and as a side effect makes redirects after login/logout more predictable.
 	 *

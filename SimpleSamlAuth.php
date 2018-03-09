@@ -3,7 +3,7 @@
  * SimpleSamlAuth - LGPL 3.0 licensed
  * Copyright (C) 2015  Jørn Åne
  *
- * SAML authentication MediaWiki extension using SimpleSamlPhp.
+ * SAML authentication MediaWiki extension using SimpleSAMLphp.
  *
  * @file
  * @ingroup Extensions

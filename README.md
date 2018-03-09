@@ -1,21 +1,21 @@
 # SAML plugin for MediaWiki
 
 ## Glossary
-* **SimpleSamlAuth** This extension, uses *SimpleSamlPhp* to allow SAML login in *MediaWiki*.
-* **SimpleSamlPhp** Open source lightweight SAML implementation by UNINETT.
+* **SimpleSamlAuth** This extension, uses *SimpleSAMLphp* to allow SAML login in *MediaWiki*.
+* **SimpleSAMLphp** Open source lightweight SAML implementation by UNINETT.
 * **MediaWiki** Open source Wiki software.
 
 ## Requirements
 * [SimpleSAMLphp](//simplesamlphp.org) (tested on 1.15 and newer)
 * [MediaWiki](//mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
 
-**IMPORTANT** If you run MediaWiki 1.27 or newer, SimpleSamlPhp **MUST** be configured to use an alternative session handler.
+**IMPORTANT** If you run MediaWiki 1.27 or newer, SimpleSAMLphp **MUST** be configured to use an alternative session handler.
 If this is not done, SAML authentication succeeds, but MediaWiki still shows that nobody is logged in.
-Please refer to [the SimpleSamlPhp website](//simplesamlphp.org/docs/stable/simplesamlphp-maintenance) on how to configure SimpleSamlPhp for session storage.
+Please refer to [the SimpleSAMLphp website](//simplesamlphp.org/docs/stable/simplesamlphp-maintenance) on how to configure SimpleSAMLphp for session storage.
 
 ## Preparation
-* Install SimpleSamlPhp on the same domain as your MediaWiki installation.
-* In SimpleSamlPhp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works.
+* Install SimpleSAMLphp on the same domain as your MediaWiki installation.
+* In SimpleSAMLphp, use the *Authentication* -> *Test configured authentication sources* feature to ensure that authentication works.
 Also make sure that the attributes make sense.
 
 You may keep the attributes page open for later reference,  
@@ -46,7 +46,7 @@ $wgSamlUsernameAttr = 'uid';
 $wgSamlRealnameAttr = 'cn';
 $wgSamlMailAttr = 'mail';
 
-// SimpleSamlPhp settings
+// SimpleSAMLphp settings
 $wgSamlSspRoot = '/usr/share/simplesamlphp';
 $wgSamlAuthSource = 'default-sp';
 $wgSamlPostLogoutRedirect = NULL;
@@ -80,10 +80,10 @@ There are three options; `SAML_OPTIONAL` `SAML_LOGIN_ONLY` `SAML_REQUIRED`:
 You can still use the [MediaWiki methods for preventing access](http://www.mediawiki.org/wiki/Manual:Preventing_access) to block certain actions, even if SimpleSamlAuth won't block them. The only exception is that `$wgSamlCreateUser = true` will have priority over `$wgGroupPermissions['*']['createaccount'] = false`.
 
 ### $wgSamlAuthSource
-This is the name of the AuthSource you configured in SimpleSamlPhp.
-You can easily find it by going to the SimpleSamlPhp installation page and going to *Authentication* -> *Test configured authentication sources*.
+This is the name of the AuthSource you configured in SimpleSAMLphp.
+You can easily find it by going to the SimpleSAMLphp installation page and going to *Authentication* -> *Test configured authentication sources*.
 The word you have to click there is the name of your AuthSource.
-For SAML sessions, the standard preconfigured name in SimpleSamlPhp is `default-sp` and this is also what SimpleSamlAuth will guess if you omit the variable.
+For SAML sessions, the standard preconfigured name in SimpleSAMLphp is `default-sp` and this is also what SimpleSamlAuth will guess if you omit the variable.
 
 ### $wgSamlPostLogoutRedirect
 This is an URL where users are redirected when they log out from the MediaWiki installation.
@@ -106,17 +106,17 @@ $wgSamlGroupMap = array(
 );
 ```
 An array as illustrated here will add users to the `sysop` MediaWiki group, if they have a SAML attribute named `groups` with at least a value `admin`.
-If you want more fine-grained control, look at the [SimpleSamlPhp role module](https://github.com/jornane/sspmod_role).
+If you want more fine-grained control, look at the [SimpleSAMLphp role module](https://github.com/jornane/sspmod_role).
 
 ### [$wgSessionName](https://www.mediawiki.org/wiki/Manual:$wgSessionName)
-The name of the cookie containing the session ID. When using PHP's built-in session management in both PHP and SimpleSamlPhp, this *must* match the session name used by PHP. It should not be necessary to set this.
+The name of the cookie containing the session ID. When using PHP's built-in session management in both PHP and SimpleSAMLphp, this *must* match the session name used by PHP. It should not be necessary to set this.
 
 ### [$wgWhitelistRead](https://www.mediawiki.org/wiki/Manual:$wgWhitelistRead)
 Array of page names that can be read without being redirected to the IdP. This may be useful on sites where SAML login is required, but some pages are publicly readable. Has no effect in the behaviour of this extension unless `$wgSamlRequirement` is `SAML_REQUIRED`.
 
 ## Known Issues
 ### Weird things happen with sessions / I must click Save twice before the page saves
-This has to do with the value of `$wgSessionName`. This value must be set to `ini_get('session.name')` if you use PHP sessions in both SimpleSamlPhp and MediaWiki.  From version 0.5, SimpleSamlAuth will take care of this automatically.
+This has to do with the value of `$wgSessionName`. This value must be set to `ini_get('session.name')` if you use PHP sessions in both SimpleSAMLphp and MediaWiki.  From version 0.5, SimpleSamlAuth will take care of this automatically.
 
 ### SAML users can edit their e-mail address
 Extensions can only disable preferences [since MediaWiki 1.16](http://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences).
@@ -131,7 +131,7 @@ Make sure that you have configured `$wgSamlMailAttr` correctly.
 There is not really a difference between local accounts and remote accounts in MediaWiki.
 [There has been an idea to implement this](http://www.mediawiki.org/wiki/ExternalAuth), but it looks like it's dead now.
 
-If SimpleSamlPhp presents a valid session, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
+If SimpleSAMLphp presents a valid session, SimpleSamlAuth simply finds a local MediaWiki user with a username roughly equal to the value of the username attribute; if it doesn't exist, and if `$wgSamlCreateUser` is set, the user is created.
 This newly created user will have no password, but will be able to reset their password if a valid e-mail address has been set.
 
 ### Other issue?
