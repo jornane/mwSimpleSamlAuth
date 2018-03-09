@@ -6,12 +6,12 @@
 * **MediaWiki** Open source Wiki software.
 
 ## Requirements
-* [SimpleSAMLphp](//simplesamlphp.org) (tested on 1.15 and newer)
-* [MediaWiki](//mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
+* [SimpleSAMLphp](https://simplesamlphp.org) (tested on 1.15 and newer)
+* [MediaWiki](https://www.mediawiki.org) (tested on 1.15, 1.16 or newer required for some features)
 
 **IMPORTANT** If you run MediaWiki 1.27 or newer, SimpleSAMLphp **MUST** be configured to use an alternative session handler.
 If this is not done, SAML authentication succeeds, but MediaWiki still shows that nobody is logged in.
-Please refer to [the SimpleSAMLphp website](//simplesamlphp.org/docs/stable/simplesamlphp-maintenance) on how to configure SimpleSAMLphp for session storage.
+Please refer to [the SimpleSAMLphp website](https://simplesamlphp.org/docs/stable/simplesamlphp-maintenance) on how to configure SimpleSAMLphp for session storage.
 
 ## Preparation
 * Install SimpleSAMLphp on the same domain as your MediaWiki installation.
@@ -21,7 +21,7 @@ Also make sure that the attributes make sense.
 You may keep the attributes page open for later reference,  
 for filling out `$wgSamlUsernameAttr`, `$wgSamlRealnameAttr` and `$wgSamlMailAttr`.
 
-If you encounter problems during the preparation, please [look here](http://simplesamlphp.org/support) for support.
+If you encounter problems during the preparation, please [look here](https://simplesamlphp.org/support) for support.
 *Only* report bugs for SimpleSamlAuth if the **preparation steps** work for you.
 
 ## Installation
