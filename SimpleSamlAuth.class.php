@@ -537,7 +537,12 @@ class SimpleSamlAuth {
 				// removed.
 				$intersections = array_intersect( $okValues, $allSamlAttrs[ $samlAttrName ] );
 
-				$onlyAdd = isset( $mediawikiGroup[ '__ADDONLY__' ] ) ? $mediawikiGroup[ '__ADDONLY__' ] : false;
+                                if ( isset( $wgSamlGroupMap[ $mediawikiGroup ][ '__ADDONLY__' ] ) ) {
+                                        $addOnly = $wgSamlGroupMap[ $mediawikiGroup ][ '__ADDONLY__' ];
+                                }
+                                else {
+                                        $addOnly = false;
+                                }
 
 				if ( count( $intersections ) > 0 ) {
 					$user->addGroup( $mediawikiGroup );
@@ -546,7 +551,7 @@ class SimpleSamlAuth {
 					// proceed to the next mediawikiGroup
 					break;
 				}
-				else if ( ! $onlyAdd ) {
+				else if ( ! $addOnly ) {
 					$user->removeGroup( $mediawikiGroup );
 				}
 			}
@@ -584,7 +589,12 @@ class SimpleSamlAuth {
 				// against all of them and keep those that match.
 				$matchingValsFromAttr = preg_grep( $regex, $allSamlAttrs[ $samlAttrName ] );
 
-				$onlyAdd = isset( $mediawikiGroup[ '__ADDONLY__' ] ) ? $mediawikiGroup[ '__ADDONLY__' ] : false;
+				if ( isset( $wgSamlGroupMapRegex[ $mediawikiGroup ][ '__ADDONLY__' ] ) ) {
+					$addOnly = $wgSamlGroupMapRegex[ $mediawikiGroup ][ '__ADDONLY__' ];
+				}
+				else {
+					$addOnly = false;
+				}
 
 				if ( count( $matchingValsFromAttr ) > 0 ) {
 					$user->addGroup( $mediawikiGroup );
@@ -593,7 +603,7 @@ class SimpleSamlAuth {
 					// proceed to the next mediawikiGroup
 					break;
 				}
-				else if ( ! $onlyAdd ) {
+				else if ( ! $addOnly ) {
 					$user->removeGroup( $mediawikiGroup );
 				}
 			}
