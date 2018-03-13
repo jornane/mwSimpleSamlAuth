@@ -491,7 +491,19 @@ class SimpleSamlAuth {
 	}
 
 	/**
-	 * Add groups based on the existence of attributes in the SAML assertion.
+	 * Add groups based on two separate functions
+	 *
+	 * @param User $user add MediaWiki permissions to this user from the current SAML assertion
+	 *
+	 * @return void $user is modified on return
+	 */
+	protected static function setGroups( User $user ) {
+		self::setGroupsStandard( $user );
+		self::setGroupsRegex( $user );
+	}
+
+	/**
+	 * Add groups based on the existence of attributes with specific matches in the SAML assertion.
 	 *
 	 * @param User $user add MediaWiki permissions to this user from the current SAML assertion
 	 *
@@ -501,10 +513,12 @@ class SimpleSamlAuth {
 	 * $wgSamlGroupMap = [
 	 *     'mediawikigroup' => [
 	 *         'samlAttrName' => ['acceptable','saml','values'],
+	 *         '__ADDONLY__' => true
 	 *     ]
 	 * ]
+	 *
 	 */
-	protected static function setGroups( User $user ) {
+	protected static function setGroupsStandard ( User $user ) {
 		global $wgSamlGroupMap;
 
 		$allSamlAttrs = self::$as->getAttributes();
@@ -523,6 +537,13 @@ class SimpleSamlAuth {
 				// removed.
 				$intersections = array_intersect( $okValues, $allSamlAttrs[ $samlAttrName ] );
 
+                                if ( isset( $wgSamlGroupMap[ $mediawikiGroup ][ '__ADDONLY__' ] ) ) {
+                                        $addOnly = $wgSamlGroupMap[ $mediawikiGroup ][ '__ADDONLY__' ];
+                                }
+                                else {
+                                        $addOnly = false;
+                                }
+
 				if ( count( $intersections ) > 0 ) {
 					$user->addGroup( $mediawikiGroup );
 
@@ -530,7 +551,59 @@ class SimpleSamlAuth {
 					// proceed to the next mediawikiGroup
 					break;
 				}
+				else if ( ! $addOnly ) {
+					$user->removeGroup( $mediawikiGroup );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Add groups based on regex matches to attributes in the SAML assertion.
+	 *
+	 * @param User $user add MediaWiki permissions to this user from the current SAML assertion
+	 *
+	 * @return void $user is modified on return
+	 *
+	 * @note $wgSamlGroupMapRegex is in the form:
+	 * $wgSamlGroupMapRegex = [
+	 *     'mediawikigroup' => [
+	 *         'samlAttrName' => "/SomeRegex/",
+	 *         '__ADDONLY__' => true
+	 *     ]
+	 * ]
+	 *
+	 */
+	protected static function setGroupsRegex ( User $user ) {
+		global $wgSamlGroupMapRegex;
+
+		$allSamlAttrs = self::$as->getAttributes();
+
+		foreach ( $wgSamlGroupMapRegex as $mediawikiGroup => $rules ) {
+			foreach ( $rules as $samlAttrName => $regex ) {
+				if ( ! isset( $allSamlAttrs[ $samlAttrName ] ) ) {
+					continue;
+				}
+
+				// A SAML attribute may have many values. Perform regex match
+				// against all of them and keep those that match.
+				$matchingValsFromAttr = preg_grep( $regex, $allSamlAttrs[ $samlAttrName ] );
+
+				if ( isset( $wgSamlGroupMapRegex[ $mediawikiGroup ][ '__ADDONLY__' ] ) ) {
+					$addOnly = $wgSamlGroupMapRegex[ $mediawikiGroup ][ '__ADDONLY__' ];
+				}
 				else {
+					$addOnly = false;
+				}
+
+				if ( count( $matchingValsFromAttr ) > 0 ) {
+					$user->addGroup( $mediawikiGroup );
+
+					// User allowed into group. Break out of this foreach and
+					// proceed to the next mediawikiGroup
+					break;
+				}
+				else if ( ! $addOnly ) {
 					$user->removeGroup( $mediawikiGroup );
 				}
 			}
